@@ -1,0 +1,107 @@
+{
+  "projectType": "frontend",
+  "projectName": "TecNM Control Escolar",
+  "projectDescription": "Android mobile app for TecNM students to view schedules, locate campus buildings, and manage academic information",
+  "theme": "palm",
+  "primaryColor": "#38d885",
+  "lightColor": "#151515",
+  "darkColor": "#d9ebe3",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/home-screen",
+              "features/schedule",
+              "features/campus-map",
+              "features/student-profile",
+              "features/qr-attendance"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/architecture",
+              "development/data-models",
+              "development/navigation",
+              "development/ui-components",
+              "development/theming"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/running-emulator",
+              "guides/fake-data",
+              "guides/supabase-integration",
+              "guides/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Data Models",
+            "pages": [
+              "api/student",
+              "api/class-session",
+              "api/building"
+            ]
+          },
+          {
+            "group": "Screens",
+            "pages": [
+              "api/screens/home",
+              "api/screens/schedule",
+              "api/screens/map",
+              "api/screens/profile"
+            ]
+          },
+          {
+            "group": "Components",
+            "pages": [
+              "api/components/bottom-bar",
+              "api/components/navigation"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Real-time class schedule with current and upcoming classes",
+    "Student academic profile with GPA and enrollment details",
+    "Campus building locator with distance information",
+    "QR code scanner for attendance tracking",
+    "Material Design 3 UI with Jetpack Compose",
+    "Bottom navigation with Home, Schedule, Map, and Profile sections",
+    "Fake data layer for development and testing"
+  ],
+  "publicApiSurface": [
+    "Student(id, controlNumber, name, career, semester, average)",
+    "ClassSession(id, subject, teacher, classroom, day, startHour, endHour, isCurrent)",
+    "Building(id, name, description, category, distance)",
+    "HomeScreen()",
+    "ScheduleScreen()",
+    "MapScreen()",
+    "ProfileScreen()",
+    "AppNavigation()",
+    "BottomBar(navController)",
+    "FakeData.student",
+    "FakeData.todayClasses",
+    "FakeData.buildings"
+  ]
+}
