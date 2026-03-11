@@ -1,0 +1,386 @@
+---
+title: Theming & Design
+description: Material Design 3 theme configuration and color system
+---
+
+The TecNM Control Escolar app uses **Material Design 3** (Material You) for its design system, providing adaptive theming, dynamic colors, and modern UI components.
+
+## Color Palette
+
+The app defines a custom color palette that includes TecNM branding colors:
+
+```kotlin Color.kt
+package com.example.appcontrolescolar.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+val Purple80 = Color(0xFFD0BCFF)
+val PurpleGrey80 = Color(0xFFCCC2DC)
+val Pink80 = Color(0xFFEFB8C8)
+
+val Purple40 = Color(0xFF6650a4)
+val PurpleGrey40 = Color(0xFF625b71)
+val Pink40 = Color(0xFF7D5260)
+
+val TecBlue = Color(0xFF1B396A)
+val TecGold = Color(0xFFB8860B)
+```
+
+### Brand Colors
+
+<CardGroup cols={2}>
+  <Card title="TecBlue" icon="square" iconType="solid" color="#1B396A">
+    **#1B396A** - Official TecNM blue for primary branding
+  </Card>
+  <Card title="TecGold" icon="square" iconType="solid" color="#B8860B">
+    **#B8860B** - Official TecNM gold for accents and highlights
+  </Card>
+</CardGroup>
+
+### Material 3 Palette
+
+The app includes Material 3's default color palette for light and dark themes:
+
+| Color | Light (40) | Dark (80) | Usage |
+|-------|-----------|-----------|-------|
+| Purple | `#6650a4` | `#D0BCFF` | Primary theme color |
+| Purple Grey | `#625b71` | `#CCC2DC` | Secondary theme color |
+| Pink | `#7D5260` | `#EFB8C8` | Tertiary theme color |
+
+<Note>
+The number suffix (40/80) refers to the tone value in Material 3's tonal palette system. 40-tone colors are used for light themes, while 80-tone colors are used for dark themes.
+</Note>
+
+## Theme Configuration
+
+The main theme is defined in `Theme.kt` with support for light/dark modes and dynamic colors:
+
+```kotlin Theme.kt
+package com.example.appcontrolescolar.ui.theme
+
+import android.app.Activity
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+
+private val DarkColorScheme = darkColorScheme(
+    primary = Purple80,
+    secondary = PurpleGrey80,
+    tertiary = Pink80
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = Purple40,
+    secondary = PurpleGrey40,
+    tertiary = Pink40
+
+    /* Other default colors to override
+    background = Color(0xFFFFFBFE),
+    surface = Color(0xFFFFFBFE),
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White,
+    onBackground = Color(0xFF1C1B1F),
+    onSurface = Color(0xFF1C1B1F),
+    */
+)
+
+@Composable
+fun AppControlEscolarTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Dynamic color is available on Android 12+
+    dynamicColor: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content
+    )
+}
+```
+
+### Color Schemes
+
+<AccordionGroup>
+  <Accordion title="Light Color Scheme">
+    Used when the system is in light mode or when dark theme is disabled:
+    - Primary: Purple40 (#6650a4)
+    - Secondary: PurpleGrey40 (#625b71)
+    - Tertiary: Pink40 (#7D5260)
+  </Accordion>
+  
+  <Accordion title="Dark Color Scheme">
+    Used when the system is in dark mode:
+    - Primary: Purple80 (#D0BCFF)
+    - Secondary: PurpleGrey80 (#CCC2DC)
+    - Tertiary: Pink80 (#EFB8C8)
+  </Accordion>
+  
+  <Accordion title="Dynamic Color Scheme">
+    On Android 12+ devices with `dynamicColor = true`, the app adapts to the user's wallpaper colors using Material You's dynamic theming.
+  </Accordion>
+</AccordionGroup>
+
+### Theme Parameters
+
+<ParamField path="darkTheme" type="Boolean" default="isSystemInDarkTheme()">
+  Controls whether to use dark or light color scheme. Defaults to following system preference.
+</ParamField>
+
+<ParamField path="dynamicColor" type="Boolean" default="true">
+  Enables Material You dynamic colors on Android 12+ devices. When enabled, colors adapt to the user's wallpaper.
+</ParamField>
+
+<ParamField path="content" type="@Composable () -> Unit" required>
+  The app content to be themed
+</ParamField>
+
+## Typography
+
+The app uses Material 3's default typography system with customizable text styles:
+
+```kotlin Type.kt
+package com.example.appcontrolescolar.ui.theme
+
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+
+// Set of Material typography styles to start with
+val Typography = Typography(
+    bodyLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp
+    )
+    /* Other default text styles to override
+    titleLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.sp
+    ),
+    labelSmall = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Medium,
+        fontSize = 11.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.5.sp
+    )
+    */
+)
+```
+
+### Typography Scale
+
+Material 3 provides a comprehensive typography scale:
+
+| Style | Size | Weight | Usage |
+|-------|------|--------|-------|
+| displayLarge | 57sp | Regular | Large hero text |
+| displayMedium | 45sp | Regular | Medium hero text |
+| displaySmall | 36sp | Regular | Small hero text |
+| headlineLarge | 32sp | Regular | Large headings |
+| headlineMedium | 28sp | Regular | Medium headings |
+| headlineSmall | 24sp | Regular | Small headings |
+| titleLarge | 22sp | Regular | Large titles |
+| titleMedium | 16sp | Medium | Medium titles |
+| titleSmall | 14sp | Medium | Small titles |
+| bodyLarge | 16sp | Regular | Large body text (customized) |
+| bodyMedium | 14sp | Regular | Medium body text |
+| bodySmall | 12sp | Regular | Small body text |
+| labelLarge | 14sp | Medium | Large labels |
+| labelMedium | 12sp | Medium | Medium labels |
+| labelSmall | 11sp | Medium | Small labels |
+
+## Theme Usage
+
+The theme is applied at the root of the app in `MainActivity`:
+
+```kotlin MainActivity.kt
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        setContent {
+            AppControlEscolarTheme {
+                AppNavigation()
+            }
+        }
+    }
+}
+```
+
+### Accessing Theme Colors
+
+Access theme colors in composables using `MaterialTheme.colorScheme`:
+
+```kotlin
+@Composable
+fun MyComponent() {
+    Surface(
+        color = MaterialTheme.colorScheme.primary
+    ) {
+        Text(
+            text = "Hello",
+            color = MaterialTheme.colorScheme.onPrimary
+        )
+    }
+}
+```
+
+### Accessing Typography
+
+Access typography styles using `MaterialTheme.typography`:
+
+```kotlin
+@Composable
+fun MyComponent() {
+    Text(
+        text = "Title",
+        style = MaterialTheme.typography.titleLarge
+    )
+    Text(
+        text = "Body text",
+        style = MaterialTheme.typography.bodyLarge
+    )
+}
+```
+
+## Material Design 3 Features
+
+<CardGroup cols={2}>
+  <Card title="Dynamic Color" icon="palette">
+    Adapts to user's wallpaper on Android 12+ for personalized theming
+  </Card>
+  <Card title="Tonal Palettes" icon="droplet">
+    Uses tonal color system for consistent, accessible color relationships
+  </Card>
+  <Card title="Dark Theme" icon="moon">
+    Automatic dark mode support with proper contrast and readability
+  </Card>
+  <Card title="Accessibility" icon="universal-access">
+    Built-in WCAG contrast ratios for all color combinations
+  </Card>
+</CardGroup>
+
+## Customization Guide
+
+### Adding Custom Colors
+
+To add new brand colors:
+
+<Steps>
+  <Step title="Define Colors">
+    Add color values to `Color.kt`:
+    ```kotlin
+    val CustomColor = Color(0xFF123456)
+    ```
+  </Step>
+  
+  <Step title="Update Color Schemes">
+    Optionally add to color schemes in `Theme.kt`:
+    ```kotlin
+    private val LightColorScheme = lightColorScheme(
+        primary = CustomColor,
+        // ...
+    )
+    ```
+  </Step>
+  
+  <Step title="Use in Composables">
+    Access via MaterialTheme or use directly:
+    ```kotlin
+    Surface(color = MaterialTheme.colorScheme.primary)
+    // or
+    Surface(color = TecBlue)
+    ```
+  </Step>
+</Steps>
+
+### Customizing Typography
+
+To add custom fonts:
+
+<Steps>
+  <Step title="Add Font Files">
+    Place font files in `res/font/` directory
+  </Step>
+  
+  <Step title="Create FontFamily">
+    Define the font family:
+    ```kotlin
+    val TecFont = FontFamily(
+        Font(R.font.custom_font_regular),
+        Font(R.font.custom_font_bold, FontWeight.Bold)
+    )
+    ```
+  </Step>
+  
+  <Step title="Update Typography">
+    Apply to typography styles:
+    ```kotlin
+    val Typography = Typography(
+        bodyLarge = TextStyle(
+            fontFamily = TecFont,
+            // ...
+        )
+    )
+    ```
+  </Step>
+</Steps>
+
+## Best Practices
+
+<Warning>
+Always use theme colors and typography instead of hardcoded values. This ensures consistency, accessibility, and proper dark mode support.
+</Warning>
+
+<Card title="Do" icon="check" color="#16a34a">
+  ```kotlin
+  Text(
+      text = "Hello",
+      color = MaterialTheme.colorScheme.primary,
+      style = MaterialTheme.typography.bodyLarge
+  )
+  ```
+</Card>
+
+<Card title="Don't" icon="xmark" color="#dc2626">
+  ```kotlin
+  Text(
+      text = "Hello",
+      color = Color(0xFF6650a4),
+      fontSize = 16.sp
+  )
+  ```
+</Card>
+
+## Future Enhancements
+
+- Apply TecBlue and TecGold as primary brand colors in color schemes
+- Add custom font family matching TecNM branding
+- Implement color variants for different states (pressed, disabled, etc.)
+- Add semantic color tokens for specific use cases (success, error, warning)

@@ -1,0 +1,157 @@
+---
+title: "ClassSession"
+description: "Data model representing a class session in the student's schedule"
+---
+
+## Overview
+
+The `ClassSession` data class represents a single class session in a student's schedule, including timing information, location, instructor details, and current status.
+
+## Data Class Definition
+
+```kotlin
+package com.example.appcontrolescolar.data.model
+
+data class ClassSession(
+    val id: Int,
+    val subject: String,
+    val teacher: String,
+    val classroom: String,
+    val day: String,
+    val startHour: String,
+    val endHour: String,
+    val isCurrent: Boolean = false
+)
+```
+
+## Properties
+
+<ParamField path="id" type="Int" required>
+  Unique identifier for the class session.
+</ParamField>
+
+<ParamField path="subject" type="String" required>
+  Name of the subject or course.
+  
+  Example: `"Programación Orientada a Objetos"`
+</ParamField>
+
+<ParamField path="teacher" type="String" required>
+  Name of the instructor teaching the class.
+  
+  Example: `"Prof. G. Hopper"`
+</ParamField>
+
+<ParamField path="classroom" type="String" required>
+  Location where the class takes place (room number, building, or lab name).
+  
+  Example: `"Lab 3"`, `"Aula A2"`
+</ParamField>
+
+<ParamField path="day" type="String" required>
+  Day of the week when the class occurs.
+  
+  Example: `"Martes"` (Tuesday)
+</ParamField>
+
+<ParamField path="startHour" type="String" required>
+  Start time of the class in 24-hour format.
+  
+  Example: `"10:00"`
+</ParamField>
+
+<ParamField path="endHour" type="String" required>
+  End time of the class in 24-hour format.
+  
+  Example: `"12:00"`
+</ParamField>
+
+<ParamField path="isCurrent" type="Boolean" default="false">
+  Flag indicating whether this class is currently in session.
+  
+  When `true`, the class is highlighted in the UI to show it's the active class.
+</ParamField>
+
+## Usage Example
+
+```kotlin
+val classSession = ClassSession(
+    id = 2,
+    subject = "Programación Orientada a Objetos",
+    teacher = "Prof. G. Hopper",
+    classroom = "Lab 3",
+    day = "Martes",
+    startHour = "10:00",
+    endHour = "12:00",
+    isCurrent = true
+)
+```
+
+## Example from FakeData
+
+```kotlin
+val todayClasses = listOf(
+    ClassSession(
+        id = 1,
+        subject = "Física I",
+        teacher = "Prof. A. Einstein",
+        classroom = "Aula A2",
+        day = "Martes",
+        startHour = "08:00",
+        endHour = "09:00",
+        isCurrent = false
+    ),
+    ClassSession(
+        id = 2,
+        subject = "Programación Orientada a Objetos",
+        teacher = "Prof. G. Hopper",
+        classroom = "Lab 3",
+        day = "Martes",
+        startHour = "10:00",
+        endHour = "12:00",
+        isCurrent = true
+    ),
+    ClassSession(
+        id = 3,
+        subject = "Inglés IV",
+        teacher = "Prof. W. Shakespeare",
+        classroom = "LC",
+        day = "Martes",
+        startHour = "13:00",
+        endHour = "14:00",
+        isCurrent = false
+    )
+)
+```
+
+## Usage in the App
+
+The `ClassSession` model is used extensively throughout the app:
+
+### Home Screen
+- **Current Class Display**: Shows the active class (where `isCurrent = true`) in a prominent card with:
+  - Subject name
+  - Time range (startHour - endHour)
+  - Classroom location
+  - Teacher name
+  - Progress indicator
+
+- **Next Classes List**: Displays upcoming classes in a timeline format with hour labels and class details
+
+### Schedule Screen
+- **Full Day Schedule**: Displays all classes for the selected day in `TimeClassCard` components
+- Each class shows:
+  - Start hour in the left column
+  - Subject and teacher in the main card
+  - Duration (startHour - endHour)
+  - Classroom as a tag
+  - Color-coded accent based on subject type
+
+### Profile Screen
+- Shows a preview of today's classes with simplified information
+- Links to the full schedule view
+
+## Related Models
+
+- [Student](/api/student) - The student attending the class
+- [Building](/api/building) - Campus buildings where classes are located

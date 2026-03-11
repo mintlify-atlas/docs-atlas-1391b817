@@ -1,0 +1,179 @@
+---
+title: "AppNavigation"
+description: "Main navigation setup and routing configuration for the app"
+---
+
+## Overview
+
+The `AppNavigation` composable sets up the main navigation structure for the TecNM Control Escolar app. It configures a `NavHost` with all app screens and integrates the bottom navigation bar.
+
+## Function Signature
+
+```kotlin
+@Composable
+fun AppNavigation()
+```
+
+## Parameters
+
+This function takes no parameters. It creates and manages its own `NavController` internally.
+
+## Implementation
+
+```kotlin
+package com.example.appcontrolescolar.navigation
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.appcontrolescolar.ui.components.BottomBar
+import com.example.appcontrolescolar.ui.screens.HomeScreen
+import com.example.appcontrolescolar.ui.screens.MapScreen
+import com.example.appcontrolescolar.ui.screens.ProfileScreen
+import com.example.appcontrolescolar.ui.screens.ScheduleScreen
+
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    Scaffold(
+        bottomBar = {
+            BottomBar(navController)
+        }
+    ) { innerPadding ->
+
+        NavHost(
+            navController = navController,
+            startDestination = AppScreens.Home.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(AppScreens.Home.route) { HomeScreen() }
+            composable(AppScreens.Schedule.route) { ScheduleScreen() }
+            composable(AppScreens.Map.route) { MapScreen() }
+            composable(AppScreens.Profile.route) { ProfileScreen() }
+        }
+    }
+}
+```
+
+## Navigation Graph
+
+The `NavHost` is configured with the following screens:
+
+### Registered Routes
+
+| Route | Screen Component | Description |
+|-------|-----------------|-------------|
+| `home` | `HomeScreen()` | Main home screen (start destination) |
+| `schedule` | `ScheduleScreen()` | Student schedule view |
+| `map` | `MapScreen()` | Campus map display |
+| `profile` | `ProfileScreen()` | User profile information |
+
+### Start Destination
+
+The navigation graph starts at `AppScreens.Home.route` ("home"), making the home screen the initial screen when the app launches.
+
+## AppScreens Route Definitions
+
+Routes are defined in the `AppScreens` sealed class:
+
+```kotlin
+package com.example.appcontrolescolar.navigation
+
+sealed class AppScreens(val route: String) {
+
+    object Home : AppScreens("home")
+
+    object Schedule : AppScreens("schedule")
+
+    object Map : AppScreens("map")
+
+    object Profile : AppScreens("profile")
+}
+```
+
+### Route Properties
+
+<ParamField path="AppScreens.Home.route" type="String">
+  Returns "home" - Route for the home screen
+</ParamField>
+
+<ParamField path="AppScreens.Schedule.route" type="String">
+  Returns "schedule" - Route for the schedule screen
+</ParamField>
+
+<ParamField path="AppScreens.Map.route" type="String">
+  Returns "map" - Route for the map screen
+</ParamField>
+
+<ParamField path="AppScreens.Profile.route" type="String">
+  Returns "profile" - Route for the profile screen
+</ParamField>
+
+## Architecture
+
+The navigation system uses the following architecture:
+
+1. **Sealed Class Pattern**: `AppScreens` uses a sealed class to define type-safe routes
+2. **Scaffold Layout**: The main layout uses Material 3 `Scaffold` with a bottom bar
+3. **NavHost**: Jetpack Compose Navigation's `NavHost` manages screen navigation
+4. **Single NavController**: One `NavController` is shared between `BottomBar` and `NavHost`
+
+## Layout Structure
+
+```
+Scaffold
+├── bottomBar: BottomBar(navController)
+└── content:
+    └── NavHost
+        ├── composable("home")
+        ├── composable("schedule")
+        ├── composable("map")
+        └── composable("profile")
+```
+
+## Usage Example
+
+```kotlin
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import android.os.Bundle
+import com.example.appcontrolescolar.navigation.AppNavigation
+import com.example.appcontrolescolar.ui.theme.AppTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            AppTheme {
+                AppNavigation()
+            }
+        }
+    }
+}
+```
+
+## Adding New Routes
+
+To add a new screen to the navigation graph:
+
+1. Add a new object to `AppScreens`:
+   ```kotlin
+   object NewScreen : AppScreens("new_screen")
+   ```
+
+2. Register the route in `AppNavigation`:
+   ```kotlin
+   composable(AppScreens.NewScreen.route) { NewScreen() }
+   ```
+
+3. Optionally add it to the `BottomBar` items list if it should appear in bottom navigation
+
+## Source Locations
+
+- Navigation setup: `app/src/main/java/com/example/appcontrolescolar/navigation/AppNavigation.kt`
+- Route definitions: `app/src/main/java/com/example/appcontrolescolar/navigation/AppScreens.kt`

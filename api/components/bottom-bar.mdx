@@ -1,0 +1,145 @@
+---
+title: "BottomBar"
+description: "Navigation bar component for the bottom of the app screen"
+---
+
+## Overview
+
+The `BottomBar` composable provides a Material 3 bottom navigation bar that integrates with the app's navigation system. It displays navigation items for the main app screens with icons and labels.
+
+## Function Signature
+
+```kotlin
+@Composable
+fun BottomBar(navController: NavHostController)
+```
+
+## Parameters
+
+<ParamField path="navController" type="NavHostController" required>
+  The navigation controller used to handle navigation between screens. This controller manages the navigation state and performs navigation actions when items are clicked.
+</ParamField>
+
+## Implementation
+
+```kotlin
+package com.example.appcontrolescolar.ui.components
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.appcontrolescolar.navigation.AppScreens
+
+@Composable
+fun BottomBar(navController: NavHostController) {
+    val items = listOf(
+        AppScreens.Home,
+        AppScreens.Schedule,
+        AppScreens.Map,
+        AppScreens.Profile
+    )
+
+    val labels = listOf("Inicio", "Horario", "Mapa", "Perfil")
+    val icons = listOf(
+        Icons.Outlined.Home,
+        Icons.Outlined.DateRange,
+        Icons.Outlined.LocationOn,
+        Icons.Outlined.AccountCircle
+    )
+
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry.value?.destination?.route
+
+    NavigationBar {
+        items.forEachIndexed { index, screen ->
+            NavigationBarItem(
+                selected = currentRoute == screen.route,
+                onClick = {
+                    navController.navigate(screen.route) {
+                        popUpTo(navController.graph.startDestinationId)
+                        launchSingleTop = true
+                    }
+                },
+                icon = {
+                    Icon(
+                        imageVector = icons[index],
+                        contentDescription = labels[index]
+                    )
+                },
+                label = {
+                    Text(labels[index])
+                }
+            )
+        }
+    }
+}
+```
+
+## Navigation Integration
+
+The `BottomBar` component integrates with the app's navigation system through the following features:
+
+### Navigation Items
+
+The bottom bar displays four navigation items:
+
+1. **Inicio (Home)** - Navigates to the home screen
+2. **Horario (Schedule)** - Navigates to the schedule screen
+3. **Mapa (Map)** - Navigates to the map screen
+4. **Perfil (Profile)** - Navigates to the profile screen
+
+### Routes
+
+Each navigation item corresponds to a route defined in `AppScreens`:
+
+- `AppScreens.Home.route` - "home"
+- `AppScreens.Schedule.route` - "schedule"
+- `AppScreens.Map.route` - "map"
+- `AppScreens.Profile.route` - "profile"
+
+### Navigation Behavior
+
+When a navigation item is clicked:
+
+- The app navigates to the corresponding route
+- The back stack is cleared up to the start destination to prevent deep back stacks
+- `launchSingleTop = true` ensures only one instance of each screen exists
+- The currently selected item is highlighted based on the current route
+
+## Usage Example
+
+```kotlin
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import com.example.appcontrolescolar.ui.components.BottomBar
+
+@Composable
+fun MyApp() {
+    val navController = rememberNavController()
+    
+    Scaffold(
+        bottomBar = {
+            BottomBar(navController)
+        }
+    ) { innerPadding ->
+        // Your app content here
+        // Use Modifier.padding(innerPadding) to avoid overlapping with bottom bar
+    }
+}
+```
+
+## Source Location
+
+`app/src/main/java/com/example/appcontrolescolar/ui/components/BottmBar.kt`

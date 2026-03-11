@@ -1,0 +1,501 @@
+---
+title: Home Screen
+description: Main dashboard displaying today's schedule, current class, and upcoming classes
+icon: house
+---
+
+The Home Screen is the main dashboard of the TecNM Control Escolar app, providing students with an at-a-glance view of their daily schedule, current class in progress, and upcoming classes.
+
+## Overview
+
+The Home Screen is built with Jetpack Compose and features a modern, card-based design that displays:
+
+- Campus branding and notifications
+- Weekly day selector
+- Current class with real-time progress
+- List of upcoming classes
+- Floating QR scanner button for attendance
+
+## UI Components
+
+### HomeHeader
+
+The header displays the TecNM campus branding and personalized greeting:
+
+```kotlin HomeScreen.kt:133-199
+@Composable
+fun HomeHeader() {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(TecBlue, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Backpack,
+                        contentDescription = "Logo",
+                        tint = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = "TecNM",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = TecBlue
+                    )
+                    Text(
+                        text = "Campus Zongolica",
+                        color = Color.Gray
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .background(Color(0xFFE6D4AA), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Perfil",
+                    tint = TecBlue
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Hola, Arlyn",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF111827)
+        )
+
+        Text(
+            text = "Aquí está tu horario de hoy",
+            style = MaterialTheme.typography.titleMedium,
+            color = Color(0xFF64748B)
+        )
+    }
+}
+```
+
+The header includes:
+- Campus logo with backpack icon
+- Campus name (TecNM - Campus Zongolica)
+- Notifications icon
+- Personalized greeting with student name
+- Contextual subtitle
+
+### WeekDaysRow
+
+A horizontal row of day cards showing the current week, with the selected day highlighted:
+
+```kotlin HomeScreen.kt:202-254
+@Composable
+fun WeekDaysRow() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        DayCard("Lun", "12", false)
+        DayCard("Mar", "13", false)
+        DayCard("Mié", "14", true)
+        DayCard("Jue", "15", false)
+        DayCard("Vie", "16", false)
+    }
+}
+
+@Composable
+fun DayCard(day: String, date: String, selected: Boolean) {
+    Card(
+        modifier = Modifier
+            .width(62.dp)
+            .height(86.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (selected) TecBlue else Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = day,
+                color = if (selected) Color.White else Color.Gray
+            )
+            Text(
+                text = date,
+                fontWeight = FontWeight.Bold,
+                color = if (selected) Color.White else Color(0xFF1E293B)
+            )
+            if (selected) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(TecGold, CircleShape)
+                )
+            } else {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+```
+
+Features:
+- Five day cards (Monday to Friday)
+- Selected day highlighted in TecBlue
+- Gold indicator dot for current day
+- White elevated cards for non-selected days
+
+### CurrentClassCard
+
+A prominent card displaying the current class in progress with a visual progress indicator:
+
+```kotlin HomeScreen.kt:257-355
+@Composable
+fun CurrentClassCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = TecBlue),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(modifier = Modifier.padding(22.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Home,
+                        contentDescription = "Materia",
+                        tint = Color.White
+                    )
+                }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "09:00",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "10:00 AM",
+                        color = Color.White.copy(alpha = 0.75f)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = "Cálculo Diferencial",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Text(
+                text = "📍 Edificio K, Aula 5",
+                color = Color.White.copy(alpha = 0.95f),
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "👨‍🏫 Ing. Juan Pérez",
+                color = Color.White.copy(alpha = 0.95f),
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Progress bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .background(Color.White.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.65f)
+                        .height(8.dp)
+                        .background(TecGold, RoundedCornerShape(10.dp))
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Inicio",
+                    color = Color.White.copy(alpha = 0.75f)
+                )
+                Text(
+                    text = "35 min restantes",
+                    color = Color.White.copy(alpha = 0.75f)
+                )
+            }
+        }
+    }
+}
+```
+
+The current class card displays:
+- Subject icon
+- Time range (start and end time)
+- Subject name (e.g., "Cálculo Diferencial")
+- Classroom location with 📍 emoji
+- Teacher name with 👨‍🏫 emoji
+- Progress bar showing class completion (65% filled in TecGold)
+- Time remaining indicator
+
+### NextClassItem
+
+A composable for displaying upcoming classes in a list format:
+
+```kotlin HomeScreen.kt:358-410
+@Composable
+fun NextClassItem(
+    hour: String,
+    subject: String,
+    classroom: String,
+    teacher: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = hour,
+            modifier = Modifier.width(56.dp),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF0F172A)
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(22.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        ) {
+            Column(modifier = Modifier.padding(18.dp)) {
+                Text(
+                    text = subject,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF111827)
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = classroom,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color(0xFF64748B)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = teacher,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF475569)
+                )
+            }
+        }
+    }
+}
+```
+
+Each upcoming class item shows:
+- Start time aligned to the left
+- White card with subject, classroom, and teacher information
+
+### QR Scanner FAB
+
+A Floating Action Button for QR-based attendance tracking (planned feature):
+
+```kotlin HomeScreen.kt:42-54
+Scaffold(
+    floatingActionButton = {
+        FloatingActionButton(
+            onClick = { },
+            containerColor = TecGold,
+            contentColor = TecBlue
+        ) {
+            Icon(
+                imageVector = Icons.Default.QrCodeScanner,
+                contentDescription = "Escanear QR"
+            )
+        }
+    },
+    containerColor = Color(0xFFF5F6F8)
+) { innerPadding ->
+```
+
+The QR scanner button:
+- Positioned as a floating action button in the bottom-right
+- Styled in TecGold with TecBlue icon
+- Displays QR code scanner icon
+- Currently has no functionality (planned for future implementation)
+
+## Layout Structure
+
+```kotlin HomeScreen.kt:58-129
+Column(
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(innerPadding)
+        .verticalScroll(rememberScrollState())
+        .padding(20.dp)
+) {
+    HomeHeader()
+    Spacer(modifier = Modifier.height(20.dp))
+    WeekDaysRow()
+    Spacer(modifier = Modifier.height(24.dp))
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Clase actual",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF0F172A)
+        )
+
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFFFF3D6)
+            ),
+            shape = RoundedCornerShape(20.dp)
+        ) {
+            Text(
+                text = "En curso",
+                color = TecGold,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+    CurrentClassCard()
+
+    Spacer(modifier = Modifier.height(28.dp))
+
+    Text(
+        text = "Siguientes clases",
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.Bold,
+        color = Color(0xFF0F172A)
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    NextClassItem(
+        hour = "10:00",
+        subject = "Programación O.O.",
+        classroom = "Lab. Computación 3",
+        teacher = "Dr. Roberto Sánchez"
+    )
+
+    Spacer(modifier = Modifier.height(14.dp))
+
+    NextClassItem(
+        hour = "12:00",
+        subject = "Tutoría",
+        classroom = "Edificio D, Aula 12",
+        teacher = "Lic. María González"
+    )
+
+    Spacer(modifier = Modifier.height(90.dp))
+}
+```
+
+## Design System
+
+<CardGroup cols={2}>
+  <Card title="Colors" icon="palette">
+    - **TecBlue**: Primary brand color used for headers and current day
+    - **TecGold**: Accent color for progress bars and FAB
+    - **Light Gray Background**: `Color(0xFFF5F6F8)`
+    - **White Cards**: Elevated with subtle shadows
+  </Card>
+  
+  <Card title="Typography" icon="text">
+    - **Headlines**: Bold, large text for section headers
+    - **Body Text**: Medium weight for content
+    - **Muted Text**: Lower opacity white or gray for secondary info
+  </Card>
+</CardGroup>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Real-Time Progress" icon="clock">
+    The current class card includes a visual progress bar that fills as the class progresses, giving students an immediate sense of time remaining.
+  </Card>
+  
+  <Card title="At-a-Glance View" icon="eye">
+    All essential information is visible without scrolling: current time, active class, and next upcoming class.
+  </Card>
+  
+  <Card title="Week Navigation" icon="calendar">
+    Quickly switch between weekdays with the day selector, with visual indication of the selected day.
+  </Card>
+  
+  <Card title="Status Badges" icon="badge-check">
+    The "En curso" (In Progress) badge provides instant visual feedback about the current class status.
+  </Card>
+</CardGroup>
+
+## Related Features
+
+<Card title="View Full Schedule" icon="calendar-days" href="/features/schedule">
+  See all classes for the week in the Schedule screen
+</Card>
+
+<Card title="QR Attendance" icon="qrcode" href="/features/qr-attendance">
+  Learn about the planned QR attendance scanning feature
+</Card>

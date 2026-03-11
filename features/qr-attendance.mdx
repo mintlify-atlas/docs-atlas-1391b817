@@ -1,0 +1,344 @@
+---
+title: QR Attendance
+description: Planned feature for QR code-based class attendance tracking
+icon: qrcode
+---
+
+<Warning>
+  This is a **planned feature** that has not yet been implemented. The UI elements exist in the app, but the scanning and attendance functionality is not yet active.
+</Warning>
+
+The QR Attendance feature is designed to allow students to quickly check in to classes by scanning QR codes displayed by professors or posted in classrooms.
+
+## Current Implementation
+
+The app includes a Floating Action Button (FAB) for the QR scanner on the Home Screen:
+
+```kotlin HomeScreen.kt:42-54
+Scaffold(
+    floatingActionButton = {
+        FloatingActionButton(
+            onClick = { },
+            containerColor = TecGold,
+            contentColor = TecBlue
+        ) {
+            Icon(
+                imageVector = Icons.Default.QrCodeScanner,
+                contentDescription = "Escanear QR"
+            )
+        }
+    },
+    containerColor = Color(0xFFF5F6F8)
+) { innerPadding ->
+```
+
+### Visual Design
+
+<CardGroup cols={2}>
+  <Card title="Button Styling" icon="palette">
+    - **Background**: TecGold (brand accent color)
+    - **Icon**: TecBlue QR scanner icon
+    - **Position**: Bottom-right corner as floating action button
+  </Card>
+  
+  <Card title="Icon" icon="qrcode">
+    Uses Material Icons' `QrCodeScanner` icon to clearly indicate the button's purpose
+  </Card>
+</CardGroup>
+
+### Current State
+
+The FAB is visible on the Home Screen but has no functionality:
+
+- **onClick**: Empty handler (no action)
+- **Visual**: Fully styled and positioned
+- **Accessibility**: Content description "Escanear QR" (Scan QR)
+
+## Intended Functionality
+
+When implemented, the QR Attendance feature will:
+
+### 1. QR Code Scanner
+
+<Card title="Camera Integration" icon="camera">
+  Open the device camera with a QR code scanner overlay when the FAB is tapped
+</Card>
+
+### 2. Attendance Registration
+
+<CardGroup cols={2}>
+  <Card title="Scan & Verify" icon="circle-check">
+    - Scan QR code displayed by professor
+    - Verify class session and time
+    - Validate student enrollment
+  </Card>
+  
+  <Card title="Record Attendance" icon="clipboard-check">
+    - Submit attendance record to backend
+    - Display confirmation message
+    - Update attendance status in app
+  </Card>
+</CardGroup>
+
+### 3. Use Cases
+
+<CardGroup cols={3}>
+  <Card title="Class Check-in" icon="door-open">
+    Students scan a QR code when entering the classroom to mark attendance
+  </Card>
+  
+  <Card title="Professor Display" icon="chalkboard-user">
+    Professors display a unique QR code for each class session
+  </Card>
+  
+  <Card title="Time-Limited" icon="hourglass-half">
+    QR codes expire after a certain time to prevent fraudulent check-ins
+  </Card>
+</CardGroup>
+
+## Technical Implementation Plan
+
+To implement this feature, the following components would be needed:
+
+### Required Permissions
+
+```kotlin AndroidManifest.xml
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-feature android:name="android.hardware.camera" />
+<uses-feature android:name="android.hardware.camera.autofocus" />
+```
+
+### QR Code Scanner Library
+
+Potential libraries to integrate:
+
+<CardGroup cols={2}>
+  <Card title="ML Kit Barcode Scanning" icon="google">
+    Google's ML Kit provides built-in barcode/QR scanning with good performance
+  </Card>
+  
+  <Card title="ZXing" icon="qrcode">
+    Popular open-source library for QR code scanning and generation
+  </Card>
+</CardGroup>
+
+### Data Model
+
+A potential `AttendanceRecord` data class:
+
+```kotlin
+data class AttendanceRecord(
+    val id: Int,
+    val studentId: Int,
+    val classSessionId: Int,
+    val timestamp: Long,
+    val method: AttendanceMethod, // QR, MANUAL, etc.
+    val status: AttendanceStatus  // PRESENT, LATE, ABSENT
+)
+
+enum class AttendanceMethod {
+    QR_SCAN,
+    MANUAL,
+    GEOFENCE
+}
+
+enum class AttendanceStatus {
+    PRESENT,
+    LATE,
+    ABSENT,
+    EXCUSED
+}
+```
+
+### UI Flow
+
+```kotlin
+@Composable
+fun QRScannerScreen(
+    onScanSuccess: (String) -> Unit,
+    onScanError: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    // Camera preview with QR scanning overlay
+    // Shows scanning guide/frame
+    // Handles scan results
+    // Displays success/error messages
+}
+```
+
+### Backend Integration
+
+<Steps>
+  <Step title="Generate QR Code">
+    Backend generates unique QR codes for each class session with encrypted data
+  </Step>
+  
+  <Step title="Student Scans">
+    Student scans QR code, app decodes and extracts class session ID and timestamp
+  </Step>
+  
+  <Step title="Submit Attendance">
+    App sends attendance record to backend API with student ID and scan data
+  </Step>
+  
+  <Step title="Verify & Store">
+    Backend verifies time validity and enrollment, stores attendance record
+  </Step>
+  
+  <Step title="Confirmation">
+    App receives confirmation and updates UI to show attendance recorded
+  </Step>
+</Steps>
+
+## User Experience Design
+
+### Scanner Overlay
+
+The QR scanner should include:
+
+- **Camera preview**: Full-screen camera view
+- **Scanning frame**: White or gold square indicating scan area
+- **Instructions**: "Position QR code within frame"
+- **Close button**: X button to dismiss scanner
+- **Flashlight toggle**: For scanning in low light
+
+### Success State
+
+```
+✓ Attendance Recorded
+
+Cálculo Diferencial
+09:00 - 10:00 AM
+Edificio K, Aula 5
+
+You've been marked present for this class.
+```
+
+### Error States
+
+<CardGroup cols={2}>
+  <Card title="Invalid QR Code" icon="triangle-exclamation">
+    "This QR code is not valid for attendance."
+  </Card>
+  
+  <Card title="Expired Code" icon="clock">
+    "This QR code has expired. Please ask your professor for a new one."
+  </Card>
+  
+  <Card title="Wrong Class" icon="calendar-xmark">
+    "This QR code is for a different class or time."
+  </Card>
+  
+  <Card title="Already Recorded" icon="circle-check">
+    "You've already recorded attendance for this class."
+  </Card>
+</CardGroup>
+
+## Security Considerations
+
+<CardGroup cols={2}>
+  <Card title="Time Validation" icon="shield-check">
+    QR codes should only be valid during class time, with a small buffer before/after
+  </Card>
+  
+  <Card title="Encryption" icon="lock">
+    QR code data should be encrypted to prevent forgery
+  </Card>
+  
+  <Card title="One-Time Use" icon="rotate">
+    QR codes should rotate periodically during class to prevent sharing
+  </Card>
+  
+  <Card title="Location Check" icon="location-dot">
+    Optional: Verify student is within campus geofence
+  </Card>
+</CardGroup>
+
+## Attendance History
+
+The feature could also include an attendance history view:
+
+```
+Attendance Record
+
+This Week: 8/10 classes
+This Semester: 85/90 classes (94%)
+
+Recent Activity:
+✓ Cálculo Diferencial - Mar 14, 9:00 AM
+✓ Programación O.O. - Mar 14, 10:00 AM
+✗ Física I - Mar 14, 8:00 AM (Absent)
+✓ Inglés IV - Mar 13, 1:00 PM
+```
+
+## Implementation Priority
+
+<Steps>
+  <Step title="Phase 1: Scanner UI">
+    Implement camera permission handling and QR scanner UI
+  </Step>
+  
+  <Step title="Phase 2: Local Scanning">
+    Add QR code detection and decoding without backend
+  </Step>
+  
+  <Step title="Phase 3: Backend Integration">
+    Connect to attendance API for recording and verification
+  </Step>
+  
+  <Step title="Phase 4: Attendance History">
+    Add UI to view attendance records and statistics
+  </Step>
+</Steps>
+
+## Alternative Attendance Methods
+
+Beyond QR codes, the system could support:
+
+<CardGroup cols={3}>
+  <Card title="NFC" icon="signal">
+    Tap phone to NFC reader in classroom
+  </Card>
+  
+  <Card title="Geofence" icon="circle-dot">
+    Automatic check-in when entering classroom geofence
+  </Card>
+  
+  <Card title="Bluetooth" icon="bluetooth">
+    Proximity detection with classroom Bluetooth beacons
+  </Card>
+</CardGroup>
+
+## Benefits
+
+<CardGroup cols={2}>
+  <Card title="Fast Check-in" icon="bolt">
+    Students can mark attendance in seconds without manual roll call
+  </Card>
+  
+  <Card title="Accurate Records" icon="clipboard-check">
+    Eliminates manual errors and provides timestamped records
+  </Card>
+  
+  <Card title="Student Visibility" icon="eye">
+    Students can track their own attendance in real-time
+  </Card>
+  
+  <Card title="Analytics" icon="chart-line">
+    Provides data for attendance patterns and engagement analysis
+  </Card>
+</CardGroup>
+
+## Related Features
+
+<Card title="Home Screen" icon="house" href="/features/home-screen">
+  The QR scanner FAB is located on the Home Screen
+</Card>
+
+<Card title="Schedule" icon="calendar-days" href="/features/schedule">
+  Attendance could be integrated into the schedule view
+</Card>
+
+<Card title="Student Profile" icon="user-graduate" href="/features/student-profile">
+  Attendance statistics could be displayed in the profile
+</Card>

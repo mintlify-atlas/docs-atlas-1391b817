@@ -1,0 +1,317 @@
+---
+title: Installation
+description: Set up your development environment for TecNM Control Escolar
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following tools installed on your development machine:
+
+### Required Software
+
+<CardGroup cols={2}>
+  <Card title="Android Studio" icon="android">
+    **Android Studio Iguana (2023.2.1) or newer**
+    
+    Download from [developer.android.com](https://developer.android.com/studio)
+  </Card>
+  <Card title="Java Development Kit" icon="java">
+    **JDK 11 or newer**
+    
+    Included with Android Studio or download separately
+  </Card>
+  <Card title="Android SDK" icon="mobile">
+    **Android SDK Platform 24-36**
+    
+    Installed via Android Studio SDK Manager
+  </Card>
+  <Card title="Git" icon="git-alt">
+    **Git 2.0+**
+    
+    For cloning the repository
+  </Card>
+</CardGroup>
+
+### System Requirements
+
+<Tip>
+**Recommended Specs for Optimal Development Experience:**
+- 8 GB RAM minimum (16 GB recommended)
+- 8 GB of available disk space
+- 1280 x 800 minimum screen resolution
+- Windows 10/11, macOS 10.14+, or Linux (64-bit)
+</Tip>
+
+## Installation Steps
+
+<Steps>
+  <Step title="Install Android Studio">
+    Download and install the latest version of Android Studio from the official website.
+    
+    During installation, make sure to install:
+    - Android SDK
+    - Android SDK Platform
+    - Android Virtual Device (for emulator)
+    
+    <Note>
+    The first launch will download additional components. This may take 10-15 minutes depending on your internet connection.
+    </Note>
+  </Step>
+
+  <Step title="Configure Android SDK">
+    Open Android Studio and navigate to **Settings → Appearance & Behavior → System Settings → Android SDK**.
+    
+    Ensure the following are installed:
+    - **Android 14.0 (API 36)** - Target SDK
+    - **Android 7.0 (API 24)** - Minimum SDK
+    - **Android SDK Build-Tools 34.0.0** or newer
+    - **Android SDK Platform-Tools**
+    - **Android Emulator**
+    
+    Click "Apply" to download and install any missing components.
+  </Step>
+
+  <Step title="Clone the Repository">
+    Open a terminal and clone the TecNM Control Escolar repository:
+    
+    <CodeGroup>
+    ```bash HTTPS
+    git clone https://github.com/your-org/tecnm-control-escolar.git
+    cd tecnm-control-escolar
+    ```
+    
+    ```bash SSH
+    git clone git@github.com:your-org/tecnm-control-escolar.git
+    cd tecnm-control-escolar
+    ```
+    
+    ```bash GitHub CLI
+    gh repo clone your-org/tecnm-control-escolar
+    cd tecnm-control-escolar
+    ```
+    </CodeGroup>
+    
+    <Tip>
+    If you don't have repository access yet, contact the project maintainers or request access through your campus IT department.
+    </Tip>
+  </Step>
+
+  <Step title="Open Project in Android Studio">
+    1. Launch Android Studio
+    2. Click **File → Open**
+    3. Navigate to the cloned `tecnm-control-escolar` directory
+    4. Select the root folder and click **OK**
+    
+    Android Studio will automatically detect the Gradle project and begin syncing.
+    
+    <Warning>
+    The first Gradle sync may take 5-10 minutes as it downloads all dependencies. Ensure you have a stable internet connection.
+    </Warning>
+  </Step>
+
+  <Step title="Wait for Gradle Sync">
+    Android Studio will automatically run a Gradle sync to download dependencies and configure the project.
+    
+    You'll see a progress indicator at the bottom of the IDE:
+    
+    ```
+    Gradle sync in progress...
+    Resolving dependencies...
+    ```
+    
+    Once complete, you should see:
+    
+    ```
+    Gradle sync completed successfully
+    ```
+    
+    The project structure will appear in the Project panel on the left.
+  </Step>
+
+  <Step title="Verify Project Configuration">
+    Check that the project is properly configured by opening:
+    
+    **app/build.gradle.kts**
+    
+    ```kotlin
+    android {
+        namespace = "com.example.appcontrolescolar"
+        compileSdk = 36
+        
+        defaultConfig {
+            applicationId = "com.example.appcontrolescolar"
+            minSdk = 24
+            targetSdk = 36
+            versionCode = 1
+            versionName = "1.0"
+        }
+        
+        buildFeatures {
+            compose = true
+        }
+    }
+    
+    dependencies {
+        implementation("androidx.compose.material:material-icons-extended")
+        implementation("androidx.navigation:navigation-compose:2.7.7")
+        implementation(libs.androidx.compose.material3)
+        // ... other dependencies
+    }
+    ```
+    
+    Verify that:
+    - `minSdk = 24` (Android 7.0)
+    - `targetSdk = 36` (Android 14)
+    - Compose is enabled
+    - Navigation Compose is included
+  </Step>
+</Steps>
+
+## Alternative Installation Methods
+
+### Using Android Studio's VCS Integration
+
+You can clone the repository directly from Android Studio:
+
+<Steps>
+  <Step title="Open VCS Dialog">
+    In Android Studio, click **File → New → Project from Version Control**
+  </Step>
+  
+  <Step title="Enter Repository URL">
+    Paste the repository URL:
+    ```
+    https://github.com/your-org/tecnm-control-escolar.git
+    ```
+  </Step>
+  
+  <Step title="Choose Directory">
+    Select where you want to save the project and click **Clone**
+  </Step>
+</Steps>
+
+### Manual Dependency Installation
+
+If Gradle sync fails due to network issues, you can manually download dependencies:
+
+```bash
+./gradlew build --refresh-dependencies
+```
+
+For Windows:
+```bash
+gradlew.bat build --refresh-dependencies
+```
+
+## Troubleshooting
+
+### Gradle Sync Failed
+
+<AccordionGroup>
+  <Accordion title="Error: SDK location not found">
+    **Solution:** Set the SDK path manually.
+    
+    Create a `local.properties` file in the project root:
+    
+    ```properties
+    sdk.dir=/path/to/Android/Sdk
+    ```
+    
+    Common paths:
+    - **Windows:** `C:\Users\YourName\AppData\Local\Android\Sdk`
+    - **macOS:** `/Users/YourName/Library/Android/sdk`
+    - **Linux:** `/home/YourName/Android/Sdk`
+  </Accordion>
+  
+  <Accordion title="Error: Unsupported Gradle version">
+    **Solution:** Update Gradle wrapper.
+    
+    ```bash
+    ./gradlew wrapper --gradle-version=8.2
+    ```
+    
+    Then sync again in Android Studio.
+  </Accordion>
+  
+  <Accordion title="Error: Failed to resolve dependencies">
+    **Solution:** Check your internet connection and proxy settings.
+    
+    1. Go to **Settings → Appearance & Behavior → System Settings → HTTP Proxy**
+    2. Configure proxy if behind a firewall
+    3. Click **File → Invalidate Caches → Invalidate and Restart**
+  </Accordion>
+  
+  <Accordion title="Error: Java version incompatibility">
+    **Solution:** Ensure you're using JDK 11 or newer.
+    
+    Check your Java version:
+    ```bash
+    java -version
+    ```
+    
+    In Android Studio:
+    1. Go to **Settings → Build, Execution, Deployment → Build Tools → Gradle**
+    2. Set **Gradle JDK** to Java 11 or newer
+  </Accordion>
+</AccordionGroup>
+
+### Build Errors
+
+<Warning>
+**Common Build Issues:**
+
+- **Kotlin version mismatch:** Ensure you're using Kotlin 1.9+ (check `libs.versions.toml`)
+- **Compose version conflicts:** All Compose libraries should use the same BOM version
+- **Missing Android SDK platforms:** Install required SDK versions via SDK Manager
+</Warning>
+
+If you encounter persistent build errors:
+
+```bash
+# Clean the project
+./gradlew clean
+
+# Rebuild from scratch
+./gradlew build --refresh-dependencies
+```
+
+### Emulator Issues
+
+If you can't create or run the Android Emulator:
+
+1. **Enable virtualization** in your BIOS (Intel VT-x or AMD-V)
+2. **Install Intel HAXM** (for Intel processors) via SDK Manager
+3. **Increase RAM allocation** for the emulator (4 GB recommended)
+4. **Use a system image** with Google APIs for better compatibility
+
+<Tip>
+**Physical Device Alternative:**
+
+If the emulator is too slow, use a physical Android device:
+1. Enable **Developer Options** on your device
+2. Enable **USB Debugging**
+3. Connect via USB and authorize your computer
+4. Select your device from the device dropdown in Android Studio
+</Tip>
+
+## Verify Installation
+
+To verify everything is set up correctly:
+
+1. Open `MainActivity.kt` in Android Studio
+2. Check that syntax highlighting works properly
+3. Look for the green play button (▶️) in the toolbar
+4. No red error indicators should appear in the file
+
+Your development environment is now ready!
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+    Run the app and explore its features
+  </Card>
+  <Card title="Project Structure" icon="folder-tree" href="/development/architecture">
+    Learn how the codebase is organized
+  </Card>
+</CardGroup>

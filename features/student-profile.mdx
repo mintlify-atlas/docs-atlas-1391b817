@@ -1,0 +1,543 @@
+---
+title: Student Profile
+description: View student information including academic details, statistics, and today's classes
+icon: user-graduate
+---
+
+The Student Profile Screen displays comprehensive student information, including personal details, academic statistics, current enrollment, and a quick view of today's classes.
+
+## Overview
+
+Built with Jetpack Compose, the Profile Screen serves as a student information hub with visual stat cards, career information, and class previews. The design emphasizes key academic metrics like semester and GPA.
+
+## Data Model
+
+The profile uses the `Student` data class:
+
+```kotlin Student.kt
+data class Student(
+    val id: Int,
+    val controlNumber: String,
+    val name: String,
+    val career: String,
+    val semester: Int,
+    val average: Double
+)
+```
+
+## Sample Student Data
+
+```kotlin FakeData.kt
+val student = Student(
+    id = 1,
+    controlNumber = "226W0487",
+    name = "Arlyn Alfaro",
+    career = "Ingeniería en Sistemas Computacionales",
+    semester = 8,
+    average = 92.5
+)
+```
+
+## UI Components
+
+### ProfileHeader
+
+A prominent header with student avatar and edit button:
+
+```kotlin ProfileScreen.kt:142-198
+@Composable
+fun ProfileHeader() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = TecBlue,
+                shape = RoundedCornerShape(bottomStart = 36.dp, bottomEnd = 36.dp)
+            )
+            .padding(top = 30.dp, bottom = 28.dp, start = 20.dp, end = 20.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "MY PROFILE",
+                color = Color.White,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Box(
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .background(Color.White, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Avatar",
+                        tint = TecBlue,
+                        modifier = Modifier.size(64.dp)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .background(TecGold, RoundedCornerShape(14.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "Editar",
+                        tint = TecBlue,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+```
+
+Features:
+- TecBlue background with large rounded bottom corners (36dp)
+- "MY PROFILE" title
+- Large circular avatar (120dp) with person icon
+- Edit button in bottom-right corner with TecGold background
+
+### Control Number Display
+
+The student control number is displayed prominently below the header:
+
+```kotlin ProfileScreen.kt:62-67
+Text(
+    text = student.controlNumber,
+    style = MaterialTheme.typography.titleMedium,
+    color = Color(0xFF94A3B8),
+    fontWeight = FontWeight.Medium
+)
+```
+
+### StatCard
+
+Dual-purpose cards for displaying academic statistics:
+
+```kotlin ProfileScreen.kt:201-254
+@Composable
+fun StatCard(
+    modifier: Modifier = Modifier,
+    title: String,
+    subtitle: String,
+    iconColor: Color,
+    backgroundColor: Color,
+    textColor: Color = Color(0xFF0F172A)
+) {
+    Card(
+        modifier = modifier.height(170.dp),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .background(
+                        if (backgroundColor == TecBlue) Color.White.copy(alpha = 0.10f)
+                        else Color(0xFFF1F5F9),
+                        RoundedCornerShape(16.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (subtitle == "SEMESTER") Icons.Outlined.School else Icons.Outlined.TrendingUp,
+                    contentDescription = null,
+                    tint = iconColor
+                )
+            }
+
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (backgroundColor == TecBlue) Color.White.copy(alpha = 0.85f) else Color(0xFF475569)
+                )
+            }
+        }
+    }
+}
+```
+
+Two stat cards are displayed side-by-side:
+
+#### Semester Card (Left)
+```kotlin ProfileScreen.kt:75-81
+StatCard(
+    modifier = Modifier.weight(1f),
+    title = "${student.semester}",
+    subtitle = "SEMESTER",
+    iconColor = TecBlue,
+    backgroundColor = Color.White
+)
+```
+- White background
+- School icon in TecBlue
+- Displays current semester number (e.g., "8")
+
+#### Average Grade Card (Right)
+```kotlin ProfileScreen.kt:83-90
+StatCard(
+    modifier = Modifier.weight(1f),
+    title = "${student.average}",
+    subtitle = "AVERAGE GRADE",
+    iconColor = TecGold,
+    backgroundColor = TecBlue,
+    textColor = Color.White
+)
+```
+- TecBlue background
+- TrendingUp icon in TecGold
+- Displays GPA/average (e.g., "92.5")
+- White text for contrast
+
+### CareerCard
+
+A prominent card displaying the student's academic program:
+
+```kotlin ProfileScreen.kt:257-306
+@Composable
+fun CareerCard(career: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(26.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(58.dp)
+                    .background(Color(0xFFFFF3E8), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Computer,
+                    contentDescription = "Carrera",
+                    tint = Color(0xFFFF7A00)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = career,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF0F172A)
+                )
+                Text(
+                    text = "Computing Systems Engineering",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFF64748B)
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Outlined.ChevronRight,
+                contentDescription = "Ver",
+                tint = Color(0xFF94A3B8)
+            )
+        }
+    }
+}
+```
+
+Features:
+- Computer icon in orange circular background
+- Career name in Spanish (e.g., "Ingeniería en Sistemas Computacionales")
+- English translation below ("Computing Systems Engineering")
+- Chevron right icon indicating it's tappable
+
+### TodayClassCard
+
+Mini class cards showing today's schedule:
+
+```kotlin ProfileScreen.kt:309-374
+@Composable
+fun TodayClassCard(
+    hour: String,
+    subject: String,
+    classroom: String,
+    active: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.width(88.dp)
+            ) {
+                Text(
+                    text = hour,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF94A3B8)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(42.dp)
+                    .background(Color(0xFFE2E8F0))
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = subject,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = if (active) Color(0xFF0F172A) else Color(0xFF6B7280)
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = classroom,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color(0xFF64748B)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .background(
+                        if (active) Color(0xFF22C55E) else Color(0xFFE5E7EB),
+                        CircleShape
+                    )
+            )
+        }
+    }
+}
+```
+
+Each class card displays:
+- **Time**: Start hour in gray on the left (e.g., "07:00 AM")
+- **Divider**: Vertical line separating time from content
+- **Subject**: Class name in bold
+- **Classroom**: Room location below subject
+- **Status indicator**: Circular dot on the right
+  - Green (active) for current class
+  - Gray (inactive) for upcoming classes
+
+## Screen Layout
+
+```kotlin ProfileScreen.kt:51-138
+Column(
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(innerPadding)
+        .verticalScroll(rememberScrollState())
+) {
+    ProfileHeader()
+
+    Column(
+        modifier = Modifier.padding(20.dp)
+    ) {
+        Text(
+            text = student.controlNumber,
+            style = MaterialTheme.typography.titleMedium,
+            color = Color(0xFF94A3B8),
+            fontWeight = FontWeight.Medium
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            StatCard(...) // Semester
+            StatCard(...) // Average Grade
+        }
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        CareerCard(career = student.career)
+        
+        Spacer(modifier = Modifier.height(30.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Today's Classes",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0F172A)
+            )
+
+            Text(
+                text = "View Schedule",
+                color = TecBlue,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TodayClassCard(
+            hour = "07:00 AM",
+            subject = "Data Structures",
+            classroom = "Lab 3",
+            active = true
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        TodayClassCard(
+            hour = "09:00 AM",
+            subject = "Calculus III",
+            classroom = "Room 204",
+            active = false
+        )
+
+        Spacer(modifier = Modifier.height(90.dp))
+    }
+}
+```
+
+## Information Hierarchy
+
+The profile screen presents information in a clear hierarchy:
+
+1. **Header**: Profile title and avatar with edit button
+2. **Control Number**: Student identification
+3. **Statistics**: Two side-by-side cards for semester and GPA
+4. **Career**: Full-width card with program information
+5. **Today's Classes**: Section header with "View Schedule" link
+6. **Class List**: Mini cards for current and upcoming classes
+
+## Design Features
+
+<CardGroup cols={2}>
+  <Card title="Visual Statistics" icon="chart-simple">
+    Large stat cards with icons make key metrics (semester, GPA) immediately visible and easy to understand.
+  </Card>
+  
+  <Card title="Status Indicators" icon="circle-dot">
+    Green and gray dots clearly distinguish active classes from upcoming ones in today's schedule.
+  </Card>
+  
+  <Card title="Editable Profile" icon="pen">
+    Gold edit button in the header suggests that profile information can be updated (future functionality).
+  </Card>
+  
+  <Card title="Quick Navigation" icon="arrow-right">
+    "View Schedule" link and chevron on career card provide quick navigation to related screens.
+  </Card>
+</CardGroup>
+
+## Key Information Display
+
+The profile prominently displays:
+
+- **Student Name**: Currently shown in HomeHeader ("Hola, Arlyn")
+- **Control Number**: Unique student identifier (e.g., "226W0487")
+- **Semester**: Current semester number with school icon
+- **GPA**: Academic average with trending icon
+- **Career**: Full program name in Spanish and English
+- **Today's Classes**: Quick preview with active status
+
+## Color Scheme
+
+<CardGroup cols={3}>
+  <Card title="TecBlue" icon="droplet">
+    Primary color for headers, icons, and the GPA card background
+  </Card>
+  
+  <Card title="TecGold" icon="droplet">
+    Accent color for the edit button and GPA icon
+  </Card>
+  
+  <Card title="White & Gray" icon="droplet">
+    White cards on light gray background for clean, modern appearance
+  </Card>
+</CardGroup>
+
+## Current Implementation
+
+The profile currently includes:
+
+- Static student data from FakeData.student
+- Non-functional edit button (UI only)
+- Static today's classes (no dynamic filtering)
+- "View Schedule" text link (no navigation)
+- Career card chevron (no detail view)
+
+## Future Enhancements
+
+<CardGroup cols={2}>
+  <Card title="Profile Editing" icon="pen-to-square">
+    Enable the edit button to allow students to update personal information and preferences.
+  </Card>
+  
+  <Card title="Photo Upload" icon="camera">
+    Replace the default icon with a photo upload feature for custom profile pictures.
+  </Card>
+  
+  <Card title="Academic History" icon="clock-rotate-left">
+    Show semester-by-semester grade history and academic progress over time.
+  </Card>
+  
+  <Card title="Interactive Links" icon="link">
+    Make "View Schedule" and career card tappable to navigate to related screens.
+  </Card>
+</CardGroup>
+
+## Related Features
+
+<Card title="Home Screen" icon="house" href="/features/home-screen">
+  The home screen displays the student name in the header greeting
+</Card>
+
+<Card title="Schedule" icon="calendar-days" href="/features/schedule">
+  View complete class schedule with all sessions
+</Card>

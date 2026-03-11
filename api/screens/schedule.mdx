@@ -1,0 +1,259 @@
+---
+title: "ScheduleScreen"
+description: "Full schedule view displaying daily class timetable"
+---
+
+## Overview
+
+The `ScheduleScreen` displays a comprehensive daily schedule of classes for the current semester. It shows all classes with their time slots, locations, and instructors in a timeline format with color-coded subjects.
+
+## Main Composable
+
+### ScheduleScreen()
+
+```kotlin
+@Composable
+fun ScheduleScreen()
+```
+
+The primary composable function that renders the schedule screen layout. It uses a `Scaffold` with a floating action button and displays:
+
+- Header with semester information and day selector
+- Timeline view of all classes for the day
+- Lunch break indicator
+- Color-coded subject cards
+
+**Features:**
+- Add button FAB in TecBlue color
+- Scrollable timeline with vertical scroll state
+- Light gray background (Color(0xFFF5F6F8))
+- Semester label: "SEMESTRE AGO-DIC 2026"
+
+**Location:** ScheduleScreen.kt:44
+
+## Sub-Composables
+
+### ScheduleHeader()
+
+```kotlin
+@Composable
+fun ScheduleHeader()
+```
+
+Displays the top header section with TecBlue background and rounded bottom corners. Includes:
+
+- Semester label ("SEMESTRE AGO-DIC 2026")
+- "Horario" title in large bold text
+- Week day selector chips (Monday - Friday)
+
+**Styling:**
+- TecBlue background
+- 28dp rounded bottom corners
+- White text with varying opacity
+- Day chips with selection states
+
+**Location:** ScheduleScreen.kt:130
+
+<CodeGroup>
+```kotlin ScheduleHeader Implementation
+@Composable
+fun ScheduleHeader() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = TecBlue,
+                shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)
+            )
+            .padding(20.dp)
+    ) {
+        Column {
+            Text(
+                text = "SEMESTRE AGO-DIC 2026",
+                color = Color.White.copy(alpha = 0.65f),
+                style = MaterialTheme.typography.labelLarge
+            )
+            Text(
+                text = "Horario",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold
+            )
+            // Day selector row...
+        }
+    }
+}
+```
+</CodeGroup>
+
+### ScheduleDayChip()
+
+```kotlin
+@Composable
+fun ScheduleDayChip(
+    day: String,
+    number: String,
+    selected: Boolean
+)
+```
+
+Displays a day selector chip in the header for navigating between weekdays.
+
+**Parameters:**
+- `day` - Day abbreviation (e.g., "Lun", "Mar")
+- `number` - Day number (e.g., "12", "13")
+- `selected` - Whether this day is currently selected
+
+**Visual Behavior:**
+- Selected: White background with TecBlue text and dot indicator
+- Unselected: Transparent background with white text
+- Card size: 58dp width × 88dp height
+
+**Location:** ScheduleScreen.kt:177
+
+### TimeClassCard()
+
+```kotlin
+@Composable
+fun TimeClassCard(
+    hour: String,
+    endHour: String,
+    subject: String,
+    teacher: String,
+    tag: String,
+    colorLine: Color,
+    cardColor: Color
+)
+```
+
+Displays a class entry in the schedule timeline with time, subject details, and color coding.
+
+**Parameters:**
+- `hour` - Start time (e.g., "08:00")
+- `endHour` - End time (e.g., "09:00")
+- `subject` - Course name
+- `teacher` - Instructor name
+- `tag` - Room/location tag (e.g., "A2", "Lab 3")
+- `colorLine` - Accent color for the left border
+- `cardColor` - Background color for the card
+
+**Layout:**
+- Time displayed on left (58dp width)
+- Card with 5dp colored left border
+- Subject name and teacher in card body
+- Room tag in top-right corner
+- Time range with clock icon at bottom
+
+**Location:** ScheduleScreen.kt:217
+
+<CodeGroup>
+```kotlin TimeClassCard Example
+TimeClassCard(
+    hour = "10:00",
+    endHour = "12:00",
+    subject = "Programación Orientada a Objetos",
+    teacher = "Prof. G. Hopper",
+    tag = "Lab 3",
+    colorLine = Color(0xFF10B981),
+    cardColor = Color(0xFFEFFAF5)
+)
+
+TimeClassCard(
+    hour = "15:00",
+    endHour = "16:00",
+    subject = "Cálculo Integral",
+    teacher = "Prof. I. Newton",
+    tag = "B12",
+    colorLine = Color(0xFF6366F1),
+    cardColor = Color(0xFFF1F2FF)
+)
+```
+</CodeGroup>
+
+### LunchCard()
+
+```kotlin
+@Composable
+fun LunchCard()
+```
+
+Displays a special card for the lunch break period in the schedule.
+
+**Display:**
+- Time: "12:00"
+- Text: "🍴 Lunch Break"
+- Light gray background (Color(0xFFF8FAFC))
+- Centered text with medium weight
+
+**Location:** ScheduleScreen.kt:321
+
+<CodeGroup>
+```kotlin LunchCard Implementation
+@Composable
+fun LunchCard() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = "12:00",
+            modifier = Modifier.width(58.dp),
+            color = Color(0xFF94A3B8),
+            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.titleMedium
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 18.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "🍴 Lunch Break",
+                    color = Color(0xFF94A3B8),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
+}
+```
+</CodeGroup>
+
+## Color Coding System
+
+The schedule uses different colors to distinguish between subjects:
+
+| Subject | Line Color | Card Background |
+|---------|------------|----------------|
+| Física I | #29B6F6 (Blue) | #EFF7FD (Light Blue) |
+| Programación O.O. | #10B981 (Green) | #EFFAF5 (Light Green) |
+| Inglés IV | #FF6B00 (Orange) | #FFF5EC (Light Orange) |
+| Cálculo Integral | #6366F1 (Indigo) | #F1F2FF (Light Indigo) |
+
+## Schedule Format
+
+A typical daily schedule includes:
+
+1. Morning classes (08:00 - 12:00)
+2. Lunch break (12:00 - 13:00)
+3. Afternoon classes (13:00 - 16:00)
+
+Each class card shows:
+- Start and end times
+- Subject name
+- Professor name
+- Room/location tag
+- Color-coded left border
+
+## Source Code
+
+**File:** `app/src/main/java/com/example/appcontrolescolar/ui/screens/ScheduleScreen.kt`

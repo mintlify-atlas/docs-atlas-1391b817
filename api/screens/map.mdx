@@ -1,0 +1,262 @@
+---
+title: "MapScreen"
+description: "Campus map screen for finding buildings, classrooms, and facilities"
+---
+
+## Overview
+
+The `MapScreen` provides an interactive campus map that helps students locate buildings, classrooms, laboratories, and facilities. It includes a search function, category filters, and a visual map representation.
+
+## Main Composable
+
+### MapScreen()
+
+```kotlin
+@Composable
+fun MapScreen()
+```
+
+The primary composable function that renders the campus map screen. It uses a `Scaffold` with a floating action button for location services and displays:
+
+- Header with "CAMPUS LOCATOR" branding
+- Search bar for buildings and rooms
+- Category filter chips
+- Visual campus map representation
+- List of nearby buildings with distances
+
+**Features:**
+- My Location FAB in TecBlue color
+- Search text field with state management
+- Filter chips for content categories
+- Interactive building list
+- Light gray background (Color(0xFFF5F6F8))
+
+**Location:** MapScreen.kt:53
+
+<CodeGroup>
+```kotlin MapScreen State
+@Composable
+fun MapScreen() {
+    val searchText = remember { mutableStateOf("") }
+    
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { },
+                containerColor = TecBlue,
+                contentColor = Color.White
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MyLocation,
+                    contentDescription = "Ubicación"
+                )
+            }
+        },
+        containerColor = Color(0xFFF5F6F8)
+    ) { innerPadding ->
+        // Map content...
+    }
+}
+```
+</CodeGroup>
+
+## Sub-Composables
+
+### MapHeader()
+
+```kotlin
+@Composable
+fun MapHeader()
+```
+
+Displays the top header section with TecBlue background and rounded bottom corners. Includes:
+
+- Label: "CAMPUS LOCATOR"
+- Title: "Mapa del campus"
+- Description: "Encuentra rápidamente edificios, aulas y laboratorios"
+
+**Styling:**
+- TecBlue background
+- 32dp rounded bottom corners
+- White text with varying opacity levels
+- Multiple text sizes for hierarchy
+
+**Location:** MapScreen.kt:162
+
+### FilterChipCustom()
+
+```kotlin
+@Composable
+fun FilterChipCustom(
+    text: String,
+    selected: Boolean
+)
+```
+
+Displays a filter chip for category selection.
+
+**Parameters:**
+- `text` - Label text for the filter (e.g., "Todos", "Aulas", "Labs")
+- `selected` - Whether this filter is currently active
+
+**Visual Behavior:**
+- Selected: TecBlue background with white text
+- Unselected: White background with gray text
+- Pill-shaped with 50dp corner radius
+- Semi-bold font weight
+
+**Available Filters:**
+- "Todos" (All)
+- "Aulas" (Classrooms)
+- "Labs" (Laboratories)
+- "Cafetería" (Cafeteria)
+
+**Location:** MapScreen.kt:204
+
+### CampusMapCard()
+
+```kotlin
+@Composable
+fun CampusMapCard()
+```
+
+Renders a visual representation of the campus map with building locations.
+
+**Features:**
+- Large card container (320dp height)
+- Light gray background with border
+- Building boxes positioned with offsets:
+  - **Edificio A** - Blue box at (28dp, 42dp)
+  - **Lab 3** - Green box at (180dp, 82dp)
+  - **Cafetería** - Orange box at (90dp, 210dp)
+- Location indicator (TecGold dot at 250dp, 200dp)
+- "Plano del campus" legend in bottom-left corner
+
+**Styling:**
+- 28dp rounded corners
+- 4dp elevation
+- Color-coded building boxes with rounded corners
+- White legend card overlay
+
+**Location:** MapScreen.kt:223
+
+<CodeGroup>
+```kotlin CampusMapCard Building Example
+Box(
+    modifier = Modifier
+        .size(width = 110.dp, height = 64.dp)
+        .offset(x = 28.dp, y = 42.dp)
+        .background(Color(0xFFDCEBFF), RoundedCornerShape(18.dp)),
+    contentAlignment = Alignment.Center
+) {
+    Text(
+        text = "Edificio A",
+        color = TecBlue,
+        fontWeight = FontWeight.Bold
+    )
+}
+```
+</CodeGroup>
+
+### BuildingItem()
+
+```kotlin
+@Composable
+fun BuildingItem(
+    title: String,
+    subtitle: String,
+    iconColor: Color
+)
+```
+
+Displays a list item card for a nearby building with icon, name, description, and distance.
+
+**Parameters:**
+- `title` - Building name (e.g., "Edificio A", "Laboratorio 3")
+- `subtitle` - Description with type and distance (e.g., "Aulas generales · 120 m")
+- `iconColor` - Color for the icon and background tint
+
+**Icon Selection:**
+The component automatically selects an appropriate icon based on the building type:
+- **Labs** → Science icon (Icons.Outlined.Science)
+- **Cafetería** → Coffee icon (Icons.Outlined.Coffee)
+- **Default** → Apartment icon (Icons.Outlined.Apartment)
+
+**Layout:**
+- Circular icon container (52dp) with colored background
+- Building name in large bold text
+- Subtitle with type and distance
+- Location pin icon on the right
+- Clickable card with 3dp elevation
+
+**Location:** MapScreen.kt:324
+
+<CodeGroup>
+```kotlin BuildingItem Examples
+BuildingItem(
+    title = "Edificio A",
+    subtitle = "Aulas generales · 120 m",
+    iconColor = Color(0xFF2563EB)
+)
+
+BuildingItem(
+    title = "Laboratorio 3",
+    subtitle = "Prácticas de computación · 180 m",
+    iconColor = Color(0xFF10B981)
+)
+
+BuildingItem(
+    title = "Cafetería Central",
+    subtitle = "Zona de alimentos · 220 m",
+    iconColor = Color(0xFFFF7A00)
+)
+```
+</CodeGroup>
+
+## Search Functionality
+
+The screen includes an `OutlinedTextField` for searching buildings and classrooms:
+
+```kotlin
+OutlinedTextField(
+    value = searchText.value,
+    onValueChange = { searchText.value = it },
+    modifier = Modifier.fillMaxWidth(),
+    placeholder = {
+        Text("Buscar edificio o aula")
+    },
+    leadingIcon = {
+        Icon(
+            imageVector = Icons.Outlined.Search,
+            contentDescription = "Buscar"
+        )
+    },
+    shape = RoundedCornerShape(20.dp),
+    colors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = TecBlue,
+        unfocusedBorderColor = Color(0xFFD6DCE5),
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color.White
+    )
+)
+```
+
+## Building Color System
+
+| Building Type | Color | Hex |
+|---------------|-------|-----|
+| Edificio A (Classrooms) | Blue | #2563EB |
+| Laboratorio 3 (Labs) | Green | #10B981 |
+| Cafetería (Cafeteria) | Orange | #FF7A00 |
+
+## Map Features
+
+1. **Visual Map Card** - Shows building positions and layout
+2. **Search Bar** - Find specific buildings or rooms
+3. **Category Filters** - Filter by type (All, Classrooms, Labs, Cafeteria)
+4. **Nearby Buildings List** - Shows buildings sorted by distance
+5. **Location FAB** - Quick access to current location
+
+## Source Code
+
+**File:** `app/src/main/java/com/example/appcontrolescolar/ui/screens/MapScreen.kt`

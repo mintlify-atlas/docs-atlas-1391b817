@@ -1,0 +1,283 @@
+---
+title: UI Components
+description: Reusable Compose components used throughout the app
+---
+
+The TecNM Control Escolar app uses Jetpack Compose to build its UI with reusable, composable components. This page documents the shared components used across multiple screens.
+
+## BottomBar Component
+
+The `BottomBar` component provides the main navigation interface using Material 3's `NavigationBar`.
+
+```kotlin BottmBar.kt
+package com.example.appcontrolescolar.ui.components
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.appcontrolescolar.navigation.AppScreens
+
+@Composable
+fun BottomBar(navController: NavHostController) {
+    val items = listOf(
+        AppScreens.Home,
+        AppScreens.Schedule,
+        AppScreens.Map,
+        AppScreens.Profile
+    )
+
+    val labels = listOf("Inicio", "Horario", "Mapa", "Perfil")
+    val icons = listOf(
+        Icons.Outlined.Home,
+        Icons.Outlined.DateRange,
+        Icons.Outlined.LocationOn,
+        Icons.Outlined.AccountCircle
+    )
+
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry.value?.destination?.route
+
+    NavigationBar {
+        items.forEachIndexed { index, screen ->
+            NavigationBarItem(
+                selected = currentRoute == screen.route,
+                onClick = {
+                    navController.navigate(screen.route) {
+                        popUpTo(navController.graph.startDestinationId)
+                        launchSingleTop = true
+                    }
+                },
+                icon = {
+                    Icon(
+                        imageVector = icons[index],
+                        contentDescription = labels[index]
+                    )
+                },
+                label = {
+                    Text(labels[index])
+                }
+            )
+        }
+    }
+}
+```
+
+### Component Structure
+
+The `BottomBar` consists of four main elements:
+
+<Steps>
+  <Step title="Items Definition">
+    Defines the list of navigation destinations using `AppScreens` objects
+  </Step>
+  
+  <Step title="Labels and Icons">
+    Parallel lists for Spanish labels and Material Icons
+  </Step>
+  
+  <Step title="Route Detection">
+    Observes the current navigation route to highlight the active item
+  </Step>
+  
+  <Step title="Navigation Items">
+    Renders each `NavigationBarItem` with selection state and click handling
+  </Step>
+</Steps>
+
+### Navigation Items
+
+| Index | Screen | Label | Icon | Description |
+|-------|--------|-------|------|-------------|
+| 0 | Home | Inicio | Home | Returns to the home screen |
+| 1 | Schedule | Horario | DateRange | Shows the class schedule |
+| 2 | Map | Mapa | LocationOn | Displays campus map |
+| 3 | Profile | Perfil | AccountCircle | Shows student profile |
+
+### Props
+
+<ParamField path="navController" type="NavHostController" required>
+  The navigation controller used to handle screen transitions and observe the current route
+</ParamField>
+
+### Key Features
+
+<CardGroup cols={2}>
+  <Card title="Active State Highlighting" icon="circle-dot">
+    The current screen is automatically highlighted based on the navigation route
+  </Card>
+  <Card title="Material 3 Design" icon="palette">
+    Uses Material Design 3 NavigationBar for modern, adaptive styling
+  </Card>
+  <Card title="Outlined Icons" icon="icons">
+    Uses outlined icon variants for a clean, professional look
+  </Card>
+  <Card title="Smart Navigation" icon="route">
+    Prevents back stack buildup with `popUpTo` and `launchSingleTop`
+  </Card>
+</CardGroup>
+
+## Component Composition Patterns
+
+The app follows modern Compose patterns for building UI:
+
+### Stateless Components
+
+Components like `BottomBar` are stateless - they receive all necessary data through parameters:
+
+```kotlin
+@Composable
+fun BottomBar(navController: NavHostController) {
+    // Component logic uses navController but doesn't own it
+}
+```
+
+### State Hoisting
+
+State is hoisted to the appropriate level in the composition hierarchy:
+
+```kotlin
+@Composable
+fun AppNavigation() {
+    // NavController is created here and passed down
+    val navController = rememberNavController()
+    
+    Scaffold(
+        bottomBar = {
+            BottomBar(navController) // State passed down
+        }
+    ) { /* ... */ }
+}
+```
+
+### Composition over Inheritance
+
+Compose favors composition over inheritance. Components are built by composing smaller functions:
+
+```kotlin
+NavigationBar {  // Container
+    items.forEachIndexed { index, screen ->
+        NavigationBarItem(  // Child component
+            icon = { Icon(...) },  // Nested composable
+            label = { Text(...) }  // Nested composable
+        )
+    }
+}
+```
+
+## Material 3 Components Used
+
+The app leverages Material 3 components from `androidx.compose.material3`:
+
+<AccordionGroup>
+  <Accordion title="NavigationBar">
+    Material 3 bottom navigation container that provides adaptive styling and theming.
+  </Accordion>
+  
+  <Accordion title="NavigationBarItem">
+    Individual navigation items with built-in selection states, ripple effects, and animations.
+  </Accordion>
+  
+  <Accordion title="Icon">
+    Vector icon component that uses Material Icons from `androidx.compose.material.icons`.
+  </Accordion>
+  
+  <Accordion title="Text">
+    Text component that automatically uses theme typography styles.
+  </Accordion>
+  
+  <Accordion title="Scaffold">
+    Layout structure used in `AppNavigation` to organize the bottom bar and content.
+  </Accordion>
+</AccordionGroup>
+
+## Icon Resources
+
+The app uses Material Icons Extended for a comprehensive icon set:
+
+```kotlin
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
+```
+
+<Note>
+Ensure the Material Icons Extended dependency is added to `build.gradle`:
+```kotlin
+implementation("androidx.compose.material:material-icons-extended")
+```
+</Note>
+
+### Icon Variants
+
+The app uses **outlined** icon variants for consistency:
+
+- `Icons.Outlined.Home`
+- `Icons.Outlined.DateRange`
+- `Icons.Outlined.LocationOn`
+- `Icons.Outlined.AccountCircle`
+
+## Screen Components
+
+Individual screens are implemented as top-level composables in the `ui/screens/` package:
+
+```kotlin
+@Composable
+fun HomeScreen() {
+    // Screen implementation
+}
+
+@Composable
+fun ScheduleScreen() {
+    // Screen implementation
+}
+
+@Composable
+fun MapScreen() {
+    // Screen implementation
+}
+
+@Composable
+fun ProfileScreen() {
+    // Screen implementation
+}
+```
+
+<Card title="Screen Implementation" icon="desktop">
+  Each screen is a self-contained composable that uses `FakeData` to display content. Screens are stateless and will receive data through ViewModels in future updates.
+</Card>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Single Responsibility" icon="bullseye">
+    Each component has a clear, single purpose
+  </Card>
+  <Card title="Reusability" icon="recycle">
+    Components are designed to be reusable across screens
+  </Card>
+  <Card title="Accessibility" icon="universal-access">
+    All interactive elements include content descriptions
+  </Card>
+  <Card title="Theme Consistency" icon="swatchbook">
+    Components use theme colors and typography
+  </Card>
+</CardGroup>
+
+## Future Components
+
+Planned reusable components for future development:
+
+- **ClassCard**: Card component for displaying class sessions
+- **BuildingCard**: Card component for campus buildings
+- **ProfileInfoRow**: Row component for profile information
+- **QRScanner**: Camera composable for QR code scanning
+- **LoadingIndicator**: Consistent loading state component
+- **ErrorView**: Standard error state display

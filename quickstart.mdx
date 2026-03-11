@@ -1,80 +1,435 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get TecNM Control Escolar running in minutes
 ---
 
-## Get started in three steps
+## Running Your First Build
 
-Get your documentation site running locally and make your first customization.
+This guide will help you run TecNM Control Escolar on an emulator or physical device in just a few steps.
 
-### Step 1: Set up your local environment
+<Note>
+Make sure you've completed the [Installation](/installation) steps before proceeding.
+</Note>
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+## Quick Start Steps
+
+<Steps>
+  <Step title="Open the Project">
+    Launch Android Studio and open the TecNM Control Escolar project.
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    If you just completed installation, the project should already be open. Otherwise:
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+    1. Click **File → Open**
+    2. Navigate to the project directory
+    3. Click **OK**
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    Wait for Gradle sync to complete (you'll see a progress bar at the bottom).
+  </Step>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+  <Step title="Set Up a Device">
+    You can run the app on either an emulator or a physical Android device.
+    
+    ### Option A: Use an Emulator (Recommended for Development)
+    
+    1. Click the **Device Manager** tab on the right side of Android Studio
+    2. Click **Create Device**
+    3. Select a device definition (recommended: **Pixel 6**)
+    4. Select a system image:
+       - **Recommended:** Android 14.0 (API 34) with Google APIs
+       - Click **Download** if not already installed
+    5. Click **Finish** to create the emulator
+    
+    <Tip>
+    Choose a device with **Google Play** for the most realistic experience, or **Google APIs** for development features.
+    </Tip>
+    
+    ### Option B: Use a Physical Device
+    
+    1. Enable **Developer Options** on your Android device:
+       - Go to **Settings → About Phone**
+       - Tap **Build Number** 7 times
+    2. Enable **USB Debugging**:
+       - Go to **Settings → Developer Options**
+       - Toggle **USB Debugging** on
+    3. Connect your device via USB
+    4. Authorize your computer when prompted on the device
+    
+    Your device will appear in the device dropdown in Android Studio.
+  </Step>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+  <Step title="Run the App">
+    Now you're ready to launch the app!
+    
+    1. Select your device from the device dropdown in the toolbar
+    2. Click the green **Run** button (▶️) or press `Shift + F10`
+    
+    Android Studio will:
+    - Compile the Kotlin code
+    - Build the APK
+    - Install it on your device
+    - Launch the app
+    
+    <Note>
+    The first build may take 2-3 minutes. Subsequent builds are much faster thanks to Gradle caching.
+    </Note>
+    
+    You should see build progress in the **Build** tab at the bottom:
+    
+    ```
+    > Task :app:compileDebugKotlin
+    > Task :app:mergeDebugResources
+    > Task :app:processDebugManifest
+    > Task :app:installDebug
+    Installing APK...
+    Launching app...
+    ```
+  </Step>
 
-### Step 3: Go live
+  <Step title="Explore the App">
+    Once the app launches, you'll see the Home Screen with sample data for student **Arlyn Alfaro**.
+    
+    The app has four main screens accessible via the bottom navigation bar:
+    
+    - **Home** - Today's schedule with current class
+    - **Schedule** - Full weekly schedule view
+    - **Map** - Campus building locator
+    - **Profile** - Student academic information
+  </Step>
+</Steps>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+## Understanding the App Entry Point
 
-## Next steps
+Let's look at how the app initializes when it launches.
 
-Now that you have your docs running, explore these key features:
+### MainActivity.kt
+
+The app's entry point is `MainActivity.kt`, which sets up the Compose UI and navigation:
+
+```kotlin MainActivity.kt
+package com.example.appcontrolescolar
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import com.example.appcontrolescolar.navigation.AppNavigation
+import com.example.appcontrolescolar.ui.theme.AppControlEscolarTheme
+
+class MainActivity : ComponentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            // Apply the custom TecNM theme
+            AppControlEscolarTheme {
+                // Set up navigation between screens
+                AppNavigation()
+            }
+        }
+    }
+}
+```
+
+**Key points:**
+- Extends `ComponentActivity` for Compose support
+- `setContent` establishes the Compose UI hierarchy
+- `AppControlEscolarTheme` applies TecNM brand colors and Material Design 3
+- `AppNavigation()` creates the navigation graph
+
+### AppNavigation.kt
+
+The navigation system defines how users move between screens:
+
+```kotlin AppNavigation.kt (simplified)
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    Scaffold(
+        bottomBar = {
+            BottomBar(navController)
+        }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = AppScreens.Home.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(AppScreens.Home.route) { HomeScreen() }
+            composable(AppScreens.Schedule.route) { ScheduleScreen() }
+            composable(AppScreens.Map.route) { MapScreen() }
+            composable(AppScreens.Profile.route) { ProfileScreen() }
+        }
+    }
+}
+```
+
+**Navigation features:**
+- Bottom navigation bar persists across all screens
+- `startDestination` is the Home screen
+- Four main routes: Home, Schedule, Map, Profile
+
+## Exploring the Main Screens
+
+### Home Screen
+
+The Home screen displays today's schedule and highlights the current class.
+
+**Key features you'll see:**
+- **Header** with TecNM branding and campus name
+- **Week day selector** with the current day highlighted
+- **Current class card** with large, colorful design showing:
+  - Subject name (e.g., "Cálculo Diferencial")
+  - Time (09:00 - 10:00 AM)
+  - Location (📍 Edificio K, Aula 5)
+  - Teacher (👨‍🏫 Ing. Juan Pérez)
+  - Progress bar showing time remaining
+- **Upcoming classes** list with next 2-3 classes
+- **Floating QR button** for attendance scanning
+
+<Tip>
+The current class card uses a progress bar that shows how much of the class period has elapsed. This is calculated based on start and end times.
+</Tip>
+
+### Schedule Screen
+
+View your complete daily schedule with color-coded classes.
+
+**What you'll find:**
+- **Semester header** ("SEMESTRE AGO-DIC 2026")
+- **Day selector** at the top
+- **Time-based layout** with classes shown at their scheduled times:
+  - 08:00 - Física I (Blue)
+  - 10:00 - Programación Orientada a Objetos (Green)
+  - 12:00 - Lunch Break (Gray)
+  - 13:00 - Inglés IV (Orange)
+  - 15:00 - Cálculo Integral (Purple)
+
+Each class card includes a colored accent line, classroom tag, and time range.
+
+### Map Screen
+
+Find buildings and locations on campus.
+
+**Interactive features:**
+- **Search bar** for finding specific rooms
+- **Filter chips** (Todos, Aulas, Labs, Cafetería)
+- **Visual campus map** with building positions
+- **Building list** with distance from your location:
+  - Edificio A - 120 m
+  - Laboratorio 3 - 180 m
+  - Cafetería Central - 220 m
+- **Floating location button** to center map on your position
+
+### Profile Screen
+
+View student information and academic stats.
+
+**Profile data shown:**
+- **Student name** and photo placeholder
+- **Control number**: 226W0487
+- **Semester**: 8
+- **Average grade**: 92.5
+- **Career**: Ingeniería en Sistemas Computacionales
+- **Today's classes** quick view
+
+## Understanding FakeData
+
+The app currently uses `FakeData.kt` to provide realistic sample data during development.
+
+### Sample Student Data
+
+```kotlin FakeData.kt
+object FakeData {
+
+    val student = Student(
+        id = 1,
+        controlNumber = "226W0487",
+        name = "Arlyn Alfaro",
+        career = "Ingeniería en Sistemas Computacionales",
+        semester = 8,
+        average = 92.5
+    )
+
+    val todayClasses = listOf(
+        ClassSession(
+            id = 1,
+            subject = "Física I",
+            teacher = "Prof. A. Einstein",
+            classroom = "Aula A2",
+            day = "Martes",
+            startHour = "08:00",
+            endHour = "09:00",
+            isCurrent = false
+        ),
+        ClassSession(
+            id = 2,
+            subject = "Programación Orientada a Objetos",
+            teacher = "Prof. G. Hopper",
+            classroom = "Lab 3",
+            day = "Martes",
+            startHour = "10:00",
+            endHour = "12:00",
+            isCurrent = true // Currently active
+        ),
+        // ... more classes
+    )
+
+    val buildings = listOf(
+        Building(
+            id = 1,
+            name = "Edificio A",
+            description = "Aulas generales",
+            category = "Aulas",
+            distance = "120 m"
+        ),
+        // ... more buildings
+    )
+}
+```
+
+**Why FakeData?**
+- Enables UI development without backend dependencies
+- Provides consistent test data for all developers
+- Makes it easy to test edge cases (e.g., long class names, many classes per day)
+- Will be replaced with real API calls in production
+
+<Warning>
+Do not modify `FakeData.kt` for personal testing. Instead, create your own test data files or use dependency injection to provide alternative data sources.
+</Warning>
+
+## Making Your First Changes
+
+Try customizing the app to understand how it works:
+
+### Change the Campus Name
+
+Open `HomeScreen.kt` and find the campus name:
+
+```kotlin
+Text(
+    text = "Campus Zongolica",  // Change this!
+    color = Color.Gray
+)
+```
+
+Change it to your campus name, then rebuild and run.
+
+### Modify Theme Colors
+
+Open `ui/theme/Color.kt` to customize the TecNM brand colors:
+
+```kotlin
+val TecBlue = Color(0xFF003366)    // Primary brand color
+val TecGold = Color(0xFFFFD700)    // Accent color
+```
+
+Try different color values and see how they affect the entire app!
+
+### Add a New Class
+
+Open `FakeData.kt` and add another class to `todayClasses`:
+
+```kotlin
+ClassSession(
+    id = 5,
+    subject = "Redes de Computadoras",
+    teacher = "Prof. V. Cerf",
+    classroom = "Lab 2",
+    day = "Martes",
+    startHour = "16:00",
+    endHour = "18:00",
+    isCurrent = false
+)
+```
+
+Run the app and you'll see your new class in the schedule!
+
+## Development Workflow
+
+### Instant Run
+
+Android Studio supports **instant run** for quick iterations:
+
+1. Make changes to your Compose code
+2. Press `Ctrl + S` (Windows/Linux) or `Cmd + S` (macOS) to save
+3. Click the **Apply Changes** button (⚡) instead of full rebuild
+
+Changes appear in the running app within seconds!
+
+<Tip>
+**Apply Changes** only works for certain types of changes (UI code, functions). For structural changes (new classes, manifest updates), you'll need a full rebuild.
+</Tip>
+
+### Preview Composables
+
+You can preview Compose UI without running the app:
+
+```kotlin
+@Preview(showBackground = true)
+@Composable
+fun PreviewHomeScreen() {
+    AppControlEscolarTheme {
+        HomeScreen()
+    }
+}
+```
+
+Click the **Split** or **Design** view in Android Studio to see live previews.
+
+### Debugging
+
+Set breakpoints and debug the app:
+
+1. Click in the left margin next to any line of code to set a breakpoint
+2. Click the **Debug** button (🐞) instead of Run
+3. When the breakpoint is hit, inspect variables and step through code
+
+## Troubleshooting Runtime Issues
+
+### App Crashes on Launch
+
+**Check the Logcat:**
+1. Open the **Logcat** tab at the bottom of Android Studio
+2. Filter by your package name: `com.example.appcontrolescolar`
+3. Look for red error lines with stack traces
+
+Common causes:
+- Missing dependencies
+- Null pointer exceptions
+- Resource not found errors
+
+### UI Not Displaying Correctly
+
+- **Clear app data**: Long-press the app icon → App Info → Storage → Clear Data
+- **Reinstall the app**: Uninstall from the device and rebuild
+- **Check Compose version**: Ensure all Compose dependencies use the same version
+
+### Slow Performance
+
+- **Use Release build**: Debug builds are slower. Try a release build for performance testing
+- **Enable R8**: Gradle automatically enables R8 code shrinking in release builds
+- **Profile with Android Profiler**: Tools → Profiler to identify bottlenecks
+
+## Next Steps
+
+Now that you have the app running, explore deeper topics:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Architecture Guide" icon="sitemap" href="/development/architecture">
+    Learn how the app is structured and organized
+  </Card>
+  <Card title="UI Components" icon="palette" href="/development/ui-components">
+    Explore the Compose components used throughout the app
+  </Card>
+  <Card title="Navigation" icon="map" href="/development/navigation">
+    Understand the navigation system and routing
+  </Card>
+  <Card title="GitHub Repository" icon="github" href="https://github.com/Jesus-Puertos/AppTECNMControlEscolar">
+    Start contributing features and improvements
+  </Card>
 </CardGroup>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+Congratulations! You've successfully run TecNM Control Escolar. Continue exploring the documentation to learn more about the app's architecture and development practices.
 </Note>

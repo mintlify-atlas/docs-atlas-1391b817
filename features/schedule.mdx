@@ -1,0 +1,463 @@
+---
+title: Schedule
+description: Complete view of daily and weekly class schedules with filtering by day
+icon: calendar-days
+---
+
+The Schedule Screen provides students with a comprehensive view of their class timetable, organized by day with detailed information about each class session.
+
+## Overview
+
+Built with Jetpack Compose, the Schedule Screen displays a full day's schedule with color-coded cards for each class, break periods, and an interactive day selector.
+
+## Data Model
+
+The schedule uses the `ClassSession` data class to represent individual classes:
+
+```kotlin ClassSession.kt
+data class ClassSession(
+    val id: Int,
+    val subject: String,
+    val teacher: String,
+    val classroom: String,
+    val day: String,
+    val startHour: String,
+    val endHour: String,
+    val isCurrent: Boolean = false
+)
+```
+
+## UI Components
+
+### ScheduleHeader
+
+The header displays semester information and an interactive day selector:
+
+```kotlin ScheduleScreen.kt:130-174
+@Composable
+fun ScheduleHeader() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = TecBlue,
+                shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)
+            )
+            .padding(20.dp)
+    ) {
+        Column {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "SEMESTRE AGO-DIC 2026",
+                color = Color.White.copy(alpha = 0.65f),
+                style = MaterialTheme.typography.labelLarge
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = "Horario",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ScheduleDayChip("Lun", "12", false)
+                ScheduleDayChip("Mar", "13", true)
+                ScheduleDayChip("Mié", "14", false)
+                ScheduleDayChip("Jue", "15", false)
+                ScheduleDayChip("Vie", "16", false)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+```
+
+Features:
+- TecBlue background with rounded bottom corners
+- Current semester label (e.g., "SEMESTRE AGO-DIC 2026")
+- Large "Horario" (Schedule) title
+- Five day chips for week navigation
+
+### ScheduleDayChip
+
+Day selector chips with selection state:
+
+```kotlin ScheduleScreen.kt:177-214
+@Composable
+fun ScheduleDayChip(day: String, number: String, selected: Boolean) {
+    Card(
+        modifier = Modifier
+            .width(58.dp)
+            .height(88.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (selected) Color.White else Color.Transparent
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = day,
+                color = if (selected) TecBlue else Color.White.copy(alpha = 0.7f)
+            )
+            Text(
+                text = number,
+                color = if (selected) TecBlue else Color.White,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge
+            )
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(
+                        if (selected) TecBlue else Color.Transparent,
+                        CircleShape
+                    )
+            )
+        }
+    }
+}
+```
+
+Design:
+- Selected day: White card with TecBlue text and indicator
+- Unselected days: Transparent background with white text
+- Tall card format (88dp height) for prominent day selection
+
+### TimeClassCard
+
+The main component for displaying individual class sessions:
+
+```kotlin ScheduleScreen.kt:217-318
+@Composable
+fun TimeClassCard(
+    hour: String,
+    endHour: String,
+    subject: String,
+    teacher: String,
+    tag: String,
+    colorLine: Color,
+    cardColor: Color
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = hour,
+            modifier = Modifier.width(58.dp),
+            color = Color(0xFF94A3B8),
+            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = cardColor),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(5.dp)
+                        .height(120.dp)
+                        .background(colorLine)
+                )
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = subject,
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF0F172A)
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = teacher,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Color(0xFF475569)
+                            )
+                        }
+
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.White.copy(alpha = 0.6f)
+                            )
+                        ) {
+                            Text(
+                                text = tag,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                color = colorLine,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Outlined.AccessTime,
+                            contentDescription = null,
+                            tint = colorLine,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "$hour - $endHour",
+                            color = colorLine,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+Key elements:
+- **Time column**: Start hour displayed on the left in gray
+- **Color-coded left border**: Each subject has a unique color
+- **Background color**: Light tinted background matching the border color
+- **Room tag**: Small badge in the top-right (e.g., "A2", "Lab 3")
+- **Time range**: Icon with start and end time at the bottom
+
+### Color Coding System
+
+Different subjects use distinct color schemes:
+
+```kotlin ScheduleScreen.kt:73-121
+TimeClassCard(
+    hour = "08:00",
+    endHour = "09:00",
+    subject = "Física I",
+    teacher = "Prof. A. Einstein",
+    tag = "A2",
+    colorLine = Color(0xFF29B6F6),  // Blue
+    cardColor = Color(0xFFEFF7FD)
+)
+
+TimeClassCard(
+    hour = "10:00",
+    endHour = "12:00",
+    subject = "Programación Orientada a Objetos",
+    teacher = "Prof. G. Hopper",
+    tag = "Lab 3",
+    colorLine = Color(0xFF10B981),  // Green
+    cardColor = Color(0xFFEFFAF5)
+)
+
+TimeClassCard(
+    hour = "13:00",
+    endHour = "14:00",
+    subject = "Inglés IV",
+    teacher = "Prof. W. Shakespeare",
+    tag = "LC",
+    colorLine = Color(0xFFFF6B00),  // Orange
+    cardColor = Color(0xFFFFF5EC)
+)
+
+TimeClassCard(
+    hour = "15:00",
+    endHour = "16:00",
+    subject = "Cálculo Integral",
+    teacher = "Prof. I. Newton",
+    tag = "B12",
+    colorLine = Color(0xFF6366F1),  // Indigo
+    cardColor = Color(0xFFF1F2FF)
+)
+```
+
+### LunchCard
+
+A special card for break periods:
+
+```kotlin ScheduleScreen.kt:321-357
+@Composable
+fun LunchCard() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = "12:00",
+            modifier = Modifier.width(58.dp),
+            color = Color(0xFF94A3B8),
+            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 18.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "🍴 Lunch Break",
+                    color = Color(0xFF94A3B8),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
+}
+```
+
+Displays lunch or break periods with:
+- Centered text with 🍴 emoji
+- Light gray background
+- Same time format as class cards
+
+## Sample Schedule Data
+
+The app uses fake data for demonstration:
+
+```kotlin FakeData.kt
+val todayClasses = listOf(
+    ClassSession(
+        id = 1,
+        subject = "Física I",
+        teacher = "Prof. A. Einstein",
+        classroom = "Aula A2",
+        day = "Martes",
+        startHour = "08:00",
+        endHour = "09:00",
+        isCurrent = false
+    ),
+    ClassSession(
+        id = 2,
+        subject = "Programación Orientada a Objetos",
+        teacher = "Prof. G. Hopper",
+        classroom = "Lab 3",
+        day = "Martes",
+        startHour = "10:00",
+        endHour = "12:00",
+        isCurrent = true
+    ),
+    // ... more classes
+)
+```
+
+## Screen Layout
+
+```kotlin ScheduleScreen.kt:62-126
+Column(
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(innerPadding)
+        .verticalScroll(rememberScrollState())
+) {
+    ScheduleHeader()
+
+    Column(
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp)
+    ) {
+        TimeClassCard(...)
+        Spacer(modifier = Modifier.height(16.dp))
+        TimeClassCard(...)
+        Spacer(modifier = Modifier.height(16.dp))
+        LunchCard()
+        Spacer(modifier = Modifier.height(16.dp))
+        TimeClassCard(...)
+        Spacer(modifier = Modifier.height(16.dp))
+        TimeClassCard(...)
+        Spacer(modifier = Modifier.height(100.dp))
+    }
+}
+```
+
+## Design Features
+
+<CardGroup cols={2}>
+  <Card title="Color Coding" icon="palette">
+    Each subject has a unique color for its left border and background tint, making it easy to distinguish classes at a glance.
+  </Card>
+  
+  <Card title="Chronological Layout" icon="clock">
+    Classes are displayed in time order from top to bottom, with start times aligned to the left for easy scanning.
+  </Card>
+  
+  <Card title="Room Tags" icon="location-dot">
+    Prominent room/building tags in the top-right of each card help students quickly identify where to go.
+  </Card>
+  
+  <Card title="Break Periods" icon="coffee">
+    Lunch and break periods are visually distinguished with muted styling and emoji indicators.
+  </Card>
+</CardGroup>
+
+## Key Information Display
+
+Each class card prominently displays:
+
+- **Subject name** in bold, large text
+- **Teacher name** in medium-weight text
+- **Time range** with clock icon at the bottom
+- **Classroom location** as a badge in the corner
+- **Visual accent** through color-coded left border
+
+## Future Enhancements
+
+<CardGroup cols={2}>
+  <Card title="Interactive Day Selection" icon="hand-pointer">
+    Planned: Click day chips to filter and view schedules for different days of the week.
+  </Card>
+  
+  <Card title="Class Details" icon="circle-info">
+    Planned: Tap class cards to view detailed information, including syllabus, assignments, and grades.
+  </Card>
+</CardGroup>
+
+## Related Features
+
+<Card title="Home Screen" icon="house" href="/features/home-screen">
+  See today's schedule overview on the Home Screen
+</Card>
+
+<Card title="Campus Map" icon="map" href="/features/campus-map">
+  Find classroom locations on the campus map
+</Card>

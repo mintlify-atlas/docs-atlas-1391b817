@@ -1,0 +1,302 @@
+---
+title: "ProfileScreen"
+description: "Student profile screen displaying academic information and daily classes"
+---
+
+## Overview
+
+The `ProfileScreen` displays comprehensive student profile information including personal data, academic statistics, career information, and today's class schedule. It retrieves student data from `FakeData.student`.
+
+## Main Composable
+
+### ProfileScreen()
+
+```kotlin
+@Composable
+fun ProfileScreen()
+```
+
+The primary composable function that renders the profile screen layout. It uses a `Scaffold` and displays:
+
+- Profile header with avatar and edit button
+- Student control number
+- Academic statistics (semester and average grade)
+- Career information card
+- Today's classes list with status indicators
+
+**Data Source:**
+```kotlin
+val student = FakeData.student
+```
+
+**Features:**
+- Scrollable content with vertical scroll state
+- Light gray background (Color(0xFFF5F6F8))
+- Clean card-based layout
+- Prominent statistics display
+
+**Location:** ProfileScreen.kt:45
+
+<CodeGroup>
+```kotlin ProfileScreen Structure
+@Composable
+fun ProfileScreen() {
+    val student = FakeData.student
+    Scaffold(
+        containerColor = Color(0xFFF5F6F8)
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+        ) {
+            ProfileHeader()
+            Column(modifier = Modifier.padding(20.dp)) {
+                // Control number, stats, career, and classes
+            }
+        }
+    }
+}
+```
+</CodeGroup>
+
+## Sub-Composables
+
+### ProfileHeader()
+
+```kotlin
+@Composable
+fun ProfileHeader()
+```
+
+Displays the profile header section with TecBlue background and rounded bottom corners. Includes:
+
+- "MY PROFILE" title centered
+- Large circular avatar (120dp) with person icon
+- Edit button overlay in TecGold color
+
+**Styling:**
+- TecBlue background
+- 36dp rounded bottom corners
+- White avatar circle with TecBlue icon
+- TecGold edit button (38dp) in bottom-right of avatar
+
+**Location:** ProfileScreen.kt:142
+
+<CodeGroup>
+```kotlin ProfileHeader Implementation
+@Composable
+fun ProfileHeader() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = TecBlue,
+                shape = RoundedCornerShape(bottomStart = 36.dp, bottomEnd = 36.dp)
+            )
+            .padding(top = 30.dp, bottom = 28.dp, start = 20.dp, end = 20.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "MY PROFILE",
+                color = Color.White,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            // Avatar with edit button...
+        }
+    }
+}
+```
+</CodeGroup>
+
+### StatCard()
+
+```kotlin
+@Composable
+fun StatCard(
+    modifier: Modifier = Modifier,
+    title: String,
+    subtitle: String,
+    iconColor: Color,
+    backgroundColor: Color,
+    textColor: Color = Color(0xFF0F172A)
+)
+```
+
+Displays an academic statistic in a tall card format.
+
+**Parameters:**
+- `modifier` - Modifier for the card (typically weight for grid layout)
+- `title` - Main statistic value (e.g., semester number or grade)
+- `subtitle` - Label for the statistic ("SEMESTER" or "AVERAGE GRADE")
+- `iconColor` - Color for the icon
+- `backgroundColor` - Card background color
+- `textColor` - Text color (defaults to dark gray)
+
+**Icons:**
+- Semester → School icon (Icons.Outlined.School)
+- Average Grade → Trending Up icon (Icons.Outlined.TrendingUp)
+
+**Styling:**
+- 170dp height
+- 28dp rounded corners
+- 5dp elevation
+- Icon in rounded square container (52dp)
+- Vertical layout with icon at top, stats at bottom
+
+**Location:** ProfileScreen.kt:201
+
+<CodeGroup>
+```kotlin StatCard Usage
+Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.spacedBy(14.dp)
+) {
+    StatCard(
+        modifier = Modifier.weight(1f),
+        title = "${student.semester}",
+        subtitle = "SEMESTER",
+        iconColor = TecBlue,
+        backgroundColor = Color.White
+    )
+
+    StatCard(
+        modifier = Modifier.weight(1f),
+        title = "${student.average}",
+        subtitle = "AVERAGE GRADE",
+        iconColor = TecGold,
+        backgroundColor = TecBlue,
+        textColor = Color.White
+    )
+}
+```
+</CodeGroup>
+
+### CareerCard()
+
+```kotlin
+@Composable
+fun CareerCard(career: String)
+```
+
+Displays the student's career/major information in a horizontal card.
+
+**Parameters:**
+- `career` - Spanish career abbreviation from student data
+
+**Display:**
+- Computer icon in orange circular background (58dp)
+- Career abbreviation in bold large text
+- Full career name: "Computing Systems Engineering"
+- Chevron right icon for navigation
+
+**Styling:**
+- White background with 4dp elevation
+- 26dp rounded corners
+- Orange accent color (#FF7A00)
+- Horizontal layout with icon, text, and chevron
+
+**Location:** ProfileScreen.kt:257
+
+### TodayClassCard()
+
+```kotlin
+@Composable
+fun TodayClassCard(
+    hour: String,
+    subject: String,
+    classroom: String,
+    active: Boolean
+)
+```
+
+Displays a class card for today's schedule with status indicator.
+
+**Parameters:**
+- `hour` - Class time (e.g., "07:00 AM")
+- `subject` - Course name
+- `classroom` - Room location
+- `active` - Whether the class is currently happening
+
+**Layout:**
+- Time column on left (88dp width)
+- Vertical divider line
+- Class details in center (subject and classroom)
+- Status dot on right:
+  - Green (#22C55E) for active classes
+  - Gray (#E5E7EB) for inactive classes
+
+**Styling:**
+- White background with 3dp elevation
+- 22dp rounded corners
+- Active classes have darker text
+- Inactive classes have lighter gray text
+
+**Location:** ProfileScreen.kt:309
+
+<CodeGroup>
+```kotlin TodayClassCard Examples
+TodayClassCard(
+    hour = "07:00 AM",
+    subject = "Data Structures",
+    classroom = "Lab 3",
+    active = true
+)
+
+TodayClassCard(
+    hour = "09:00 AM",
+    subject = "Calculus III",
+    classroom = "Room 204",
+    active = false
+)
+```
+</CodeGroup>
+
+## Student Data Model
+
+The screen expects student data with the following properties:
+
+```kotlin
+data class Student(
+    val controlNumber: String,  // Student ID
+    val semester: Int,           // Current semester
+    val average: Double,         // GPA/Average grade
+    val career: String          // Major/Career name
+)
+```
+
+**Data Source:** `com.example.appcontrolescolar.data.FakeData`
+
+## Profile Sections
+
+1. **Header** - Avatar with edit button and profile title
+2. **Control Number** - Student identification number
+3. **Statistics Row** - Semester and average grade cards
+4. **Career Card** - Major information with icon
+5. **Today's Classes** - List of current day's classes with status
+
+## Color Usage
+
+| Element | Color | Purpose |
+|---------|-------|----------|
+| Header Background | TecBlue | Primary branding |
+| Edit Button | TecGold | Action highlight |
+| Semester Card | White | Info display |
+| Average Card | TecBlue | Featured stat |
+| Career Icon | Orange (#FF7A00) | Category indicator |
+| Active Class Dot | Green (#22C55E) | Status indicator |
+| Inactive Class Dot | Gray (#E5E7EB) | Status indicator |
+
+## Navigation Link
+
+The profile includes a "View Schedule" text link that can navigate to the full schedule screen. This is positioned next to the "Today's Classes" heading.
+
+## Source Code
+
+**File:** `app/src/main/java/com/example/appcontrolescolar/ui/screens/ProfileScreen.kt`  
+**Dependencies:** `com.example.appcontrolescolar.data.FakeData`, `com.example.appcontrolescolar.data.model.Student`

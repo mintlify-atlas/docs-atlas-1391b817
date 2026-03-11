@@ -1,0 +1,225 @@
+---
+title: "HomeScreen"
+description: "Main dashboard screen displaying current and upcoming classes"
+---
+
+## Overview
+
+The `HomeScreen` is the main dashboard of the TecNM Control Escolar app. It displays the current class, upcoming classes, and a weekly calendar view. The screen includes a QR scanner floating action button for quick attendance registration.
+
+## Main Composable
+
+### HomeScreen()
+
+```kotlin
+@Composable
+fun HomeScreen()
+```
+
+The primary composable function that renders the home screen layout. It uses a `Scaffold` with a floating action button for QR code scanning and displays:
+
+- Header with TecNM branding and notifications
+- Week days row with date selection
+- Current class card with progress indicator
+- List of upcoming classes
+
+**Features:**
+- QR scanner FAB (Floating Action Button) in TecGold color
+- Scrollable content with vertical scroll state
+- Light gray background (Color(0xFFF5F6F8))
+
+## Sub-Composables
+
+### HomeHeader()
+
+```kotlin
+@Composable
+fun HomeHeader()
+```
+
+Displays the top header section of the home screen including:
+
+- TecNM logo and campus name
+- Notification icon
+- Personalized greeting ("Hola, Arlyn")
+- Subtitle explaining the view
+
+**Location:** HomeScreen.kt:133
+
+### WeekDaysRow()
+
+```kotlin
+@Composable
+fun WeekDaysRow()
+```
+
+Renders a horizontal row of day cards for the current week. Shows Monday through Friday with dates and selection state.
+
+**Location:** HomeScreen.kt:202
+
+<CodeGroup>
+```kotlin WeekDaysRow Implementation
+@Composable
+fun WeekDaysRow() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        DayCard("Lun", "12", false)
+        DayCard("Mar", "13", false)
+        DayCard("Mié", "14", true)
+        DayCard("Jue", "15", false)
+        DayCard("Vie", "16", false)
+    }
+}
+```
+</CodeGroup>
+
+### DayCard()
+
+```kotlin
+@Composable
+fun DayCard(
+    day: String,
+    date: String,
+    selected: Boolean
+)
+```
+
+Displays an individual day card with day name, date number, and selection indicator.
+
+**Parameters:**
+- `day` - Day abbreviation (e.g., "Lun", "Mar")
+- `date` - Day number (e.g., "12", "13")
+- `selected` - Whether this day is currently selected
+
+**Visual Behavior:**
+- Selected cards use TecBlue background with white text
+- Unselected cards use white background with gray/dark text
+- Selected cards show a TecGold dot indicator
+
+**Location:** HomeScreen.kt:216
+
+### CurrentClassCard()
+
+```kotlin
+@Composable
+fun CurrentClassCard()
+```
+
+Displays detailed information about the currently active class in a prominent card format.
+
+**Displays:**
+- Subject icon
+- Class time (start and end)
+- Course name (e.g., "Cálculo Diferencial")
+- Classroom location with 📍 emoji
+- Teacher name with 👨‍🏫 emoji
+- Progress bar showing time elapsed/remaining
+- Remaining time indicator
+
+**Styling:**
+- TecBlue background with white text
+- Elevated card with 8dp shadow
+- 28dp rounded corners
+- TecGold progress bar indicator
+
+**Location:** HomeScreen.kt:257
+
+<CodeGroup>
+```kotlin CurrentClassCard Example
+@Composable
+fun CurrentClassCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = TecBlue),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(modifier = Modifier.padding(22.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Home,
+                        contentDescription = "Materia",
+                        tint = Color.White
+                    )
+                }
+                // Time display and other content...
+            }
+        }
+    }
+}
+```
+</CodeGroup>
+
+### NextClassItem()
+
+```kotlin
+@Composable
+fun NextClassItem(
+    hour: String,
+    subject: String,
+    classroom: String,
+    teacher: String
+)
+```
+
+Displays a compact card for an upcoming class in the schedule.
+
+**Parameters:**
+- `hour` - Start time of the class (e.g., "10:00")
+- `subject` - Course name
+- `classroom` - Room location
+- `teacher` - Instructor name
+
+**Layout:**
+- Time displayed on the left (56dp width)
+- White card with class details
+- 22dp rounded corners with 3dp elevation
+
+**Location:** HomeScreen.kt:358
+
+<CodeGroup>
+```kotlin NextClassItem Usage
+NextClassItem(
+    hour = "10:00",
+    subject = "Programación O.O.",
+    classroom = "Lab. Computación 3",
+    teacher = "Dr. Roberto Sánchez"
+)
+
+NextClassItem(
+    hour = "12:00",
+    subject = "Tutoría",
+    classroom = "Edificio D, Aula 12",
+    teacher = "Lic. María González"
+)
+```
+</CodeGroup>
+
+## Theme Colors
+
+The HomeScreen uses the following theme colors:
+
+- **TecBlue** - Primary brand color for selected states and accents
+- **TecGold** - Secondary color for highlights and progress indicators
+- **Background** - Color(0xFFF5F6F8) light gray
+- **Card backgrounds** - White with varying elevations
+
+## Navigation
+
+The screen includes a floating action button with a QR code scanner icon that can be used to quickly register attendance or scan class codes.
+
+## Source Code
+
+**File:** `app/src/main/java/com/example/appcontrolescolar/ui/screens/HomeScreen.kt`

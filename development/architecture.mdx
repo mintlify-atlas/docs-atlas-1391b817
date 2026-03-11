@@ -1,0 +1,151 @@
+---
+title: Architecture Overview
+description: Understanding the project structure and architecture of the TecNM Control Escolar app
+---
+
+The TecNM Control Escolar app follows a **single-activity architecture** using Jetpack Compose and Navigation Compose. This modern Android architecture pattern provides a clean, maintainable codebase with clear separation of concerns.
+
+## Project Structure
+
+The app is organized into logical packages following Android best practices:
+
+```
+app/src/main/java/com/example/appcontrolescolar/
+├── MainActivity.kt
+├── data/
+│   ├── model/
+│   │   ├── Student.kt
+│   │   ├── ClassSession.kt
+│   │   └── Building.kt
+│   └── FakeData.kt
+├── navigation/
+│   ├── AppScreens.kt
+│   └── AppNavigation.kt
+└── ui/
+    ├── components/
+    │   └── BottomBar.kt
+    ├── screens/
+    │   ├── HomeScreen.kt
+    │   ├── ScheduleScreen.kt
+    │   ├── MapScreen.kt
+    │   └── ProfileScreen.kt
+    └── theme/
+        ├── Color.kt
+        ├── Theme.kt
+        └── Type.kt
+```
+
+## Architecture Layers
+
+### Presentation Layer (UI)
+
+The presentation layer is built entirely with Jetpack Compose and includes:
+
+- **Screens**: Full-screen composables for each navigation destination
+- **Components**: Reusable UI components like `BottomBar`
+- **Theme**: Material Design 3 theming configuration
+
+### Data Layer
+
+Currently uses **FakeData** to simulate backend responses:
+
+- **Models**: Data classes representing domain entities
+- **FakeData**: Mock data provider for development
+
+<Note>
+The data layer will be migrated to **Supabase** in a future release for real backend integration.
+</Note>
+
+### Navigation Layer
+
+Manages screen navigation using Navigation Compose:
+
+- **AppScreens**: Sealed class defining all navigation routes
+- **AppNavigation**: NavHost setup and route-to-screen mapping
+
+## Single-Activity Architecture
+
+The app uses a single `MainActivity` that hosts all screens through Compose navigation:
+
+```kotlin MainActivity.kt
+package com.example.appcontrolescolar
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import com.example.appcontrolescolar.navigation.AppNavigation
+import com.example.appcontrolescolar.ui.theme.AppControlEscolarTheme
+
+class MainActivity : ComponentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+
+            AppControlEscolarTheme {
+
+                AppNavigation()
+
+            }
+
+        }
+    }
+}
+```
+
+### Key Benefits
+
+<CardGroup cols={2}>
+  <Card title="Simplified Navigation" icon="route">
+    All navigation is handled through Compose, eliminating fragment transactions
+  </Card>
+  <Card title="Shared State" icon="share-nodes">
+    Easy state sharing between screens without complex fragment communication
+  </Card>
+  <Card title="Lifecycle Management" icon="arrows-rotate">
+    Single activity lifecycle simplifies state preservation and restoration
+  </Card>
+  <Card title="Modern UI" icon="paintbrush">
+    Full Compose UI with Material Design 3 components
+  </Card>
+</CardGroup>
+
+## Technology Stack
+
+- **Language**: Kotlin
+- **UI Framework**: Jetpack Compose
+- **Navigation**: Navigation Compose
+- **Design System**: Material Design 3
+- **Minimum SDK**: 21 (Android 5.0 Lollipop)
+
+## Current Features
+
+The app currently implements four main screens:
+
+| Screen | Route | Purpose |
+|--------|-------|----------|
+| Home | `home` | Shows current class and upcoming schedule |
+| Schedule | `schedule` | Displays full day schedule with colored cards |
+| Map | `map` | Campus building search and location |
+| Profile | `profile` | Student information and academic details |
+
+## Future Enhancements
+
+<Steps>
+  <Step title="Backend Integration">
+    Connect to Supabase for real data persistence
+  </Step>
+  <Step title="Authentication">
+    Implement student login with control number
+  </Step>
+  <Step title="QR Attendance">
+    Add QR code scanner for class attendance tracking
+  </Step>
+  <Step title="Grades Module">
+    Display student grades and academic history
+  </Step>
+  <Step title="Real Campus Map">
+    Integrate actual campus map with location services
+  </Step>
+</Steps>

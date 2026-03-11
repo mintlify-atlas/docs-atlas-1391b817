@@ -1,0 +1,151 @@
+---
+title: Introduction
+description: Welcome to TecNM Control Escolar - A modern Android app for TecNM students
+---
+
+## What is TecNM Control Escolar?
+
+TecNM Control Escolar is a modern, student-facing mobile application designed for the Tecnológico Nacional de México (TecNM) campus system. Built specifically for Campus Zongolica, this app provides students with instant access to their class schedules, campus maps, and academic profiles—all in the palm of their hand.
+
+<Note>
+This app is currently in development and uses simulated data from `FakeData.kt` for demonstration purposes. Real backend integration is planned for future releases.
+</Note>
+
+## Key Features
+
+TecNM Control Escolar offers a comprehensive suite of features designed to enhance the student experience:
+
+### Class Schedule Management
+- **Real-time schedule viewing** - View your daily class schedule with live updates on current and upcoming classes
+- **Time-based indicators** - See which class is currently in progress with visual progress bars
+- **Full weekly view** - Browse your complete schedule across all weekdays
+- **Detailed class information** - Access teacher names, classroom locations, and time slots for each session
+
+### Interactive Campus Map
+- **Building locator** - Find any building, classroom, or laboratory on campus
+- **Distance indicators** - See how far you are from each location
+- **Category filtering** - Filter by building type (Aulas, Labs, Cafetería)
+- **Search functionality** - Quickly search for specific rooms or buildings
+- **Visual campus layout** - Interactive map showing relative positions of campus buildings
+
+### Student Profile
+- **Academic information** - View your control number, career, semester, and GPA
+- **Performance tracking** - Monitor your average grade across all courses
+- **Quick class overview** - See today's classes directly from your profile
+
+### QR Code Attendance
+- **Floating action button** - Quick access to QR scanner from the home screen
+- **Streamlined attendance** - Scan QR codes for instant attendance marking (coming soon)
+
+## Technology Stack
+
+TecNM Control Escolar is built with modern Android development tools and best practices:
+
+<CardGroup cols={2}>
+  <Card title="Kotlin" icon="code">
+    100% Kotlin codebase for type safety and modern language features
+  </Card>
+  <Card title="Jetpack Compose" icon="layer-group">
+    Declarative UI framework for building beautiful, reactive interfaces
+  </Card>
+  <Card title="Material Design 3" icon="palette">
+    Modern design system with dynamic theming and TecNM brand colors
+  </Card>
+  <Card title="Navigation Compose" icon="map">
+    Type-safe navigation between screens with bottom navigation bar
+  </Card>
+</CardGroup>
+
+### Architecture Highlights
+
+```kotlin
+// Data models with immutable data classes
+data class Student(
+    val id: Int,
+    val controlNumber: String,
+    val name: String,
+    val career: String,
+    val semester: Int,
+    val average: Double
+)
+
+data class ClassSession(
+    val id: Int,
+    val subject: String,
+    val teacher: String,
+    val classroom: String,
+    val day: String,
+    val startHour: String,
+    val endHour: String,
+    val isCurrent: Boolean = false
+)
+```
+
+The app follows a clean architecture pattern with:
+- **Data layer** - Model classes and fake data sources (`FakeData.kt`)
+- **UI layer** - Composable screens with Material Design 3 components
+- **Navigation layer** - Centralized navigation graph using Navigation Compose
+
+## Design System
+
+The app uses a custom theme based on TecNM's brand identity:
+
+- **TecBlue** - Primary brand color used for headers, navigation, and key actions
+- **TecGold** - Accent color for highlights, floating action buttons, and active states
+- **Material Design 3** - Modern component library with elevation, rounded corners, and smooth transitions
+
+<Tip>
+The app features a consistent light theme with a neutral background (`Color(0xFFF5F6F8)`) that provides excellent contrast for content cards and maintains readability throughout the day.
+</Tip>
+
+## Current Status
+
+TecNM Control Escolar is currently in **active development**. The app uses `FakeData.kt` to provide realistic sample data:
+
+- **Sample student**: Arlyn Alfaro (Control Number: 226W0487)
+- **Sample classes**: 4 daily classes including Physics, Programming, English, and Calculus
+- **Sample buildings**: Edificio A, Laboratorio 3, and Cafetería Central
+
+This allows developers and designers to build and test features before backend integration.
+
+## Get Started
+
+Ready to explore TecNM Control Escolar? Choose your path:
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Set up Android Studio and clone the repository
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Run the app and explore the main features
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/development/architecture">
+    Learn about the app's structure and design patterns
+  </Card>
+  <Card title="GitHub Repository" icon="github" href="https://github.com/Jesus-Puertos/AppTECNMControlEscolar">
+    Contribute code, report bugs, or suggest features
+  </Card>
+</CardGroup>
+
+## Who This Is For
+
+### Students
+While the production version will be available on the Play Store, developers and tech-savvy students can clone and build the app to explore upcoming features.
+
+### Developers
+Contributors working on the TecNM Control Escolar project can use this documentation to understand the codebase, set up their development environment, and add new features.
+
+### Designers
+UI/UX designers can review the implementation of Material Design 3 components and the TecNM brand guidelines within the app.
+
+<Note>
+**Minimum Requirements**
+- Android 7.0 (API level 24) or higher
+- Android Studio Iguana (2023.2.1) or newer
+- Gradle 8.0+
+- Kotlin 1.9+
+</Note>
+
+## Questions or Feedback?
+
+For issues, feature requests, or contributions, please visit the project's GitHub repository or contact the development team at Campus Zongolica.

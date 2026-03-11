@@ -1,0 +1,89 @@
+---
+title: "Student"
+description: "Data model representing a student in the TecNM Control Escolar system"
+---
+
+## Overview
+
+The `Student` data class represents a student enrolled in the TecNM system, containing their personal information, academic details, and current progress.
+
+## Data Class Definition
+
+```kotlin
+package com.example.appcontrolescolar.data.model
+
+data class Student(
+    val id: Int,
+    val controlNumber: String,
+    val name: String,
+    val career: String,
+    val semester: Int,
+    val average: Double
+)
+```
+
+## Properties
+
+<ParamField path="id" type="Int" required>
+  Unique identifier for the student in the system.
+</ParamField>
+
+<ParamField path="controlNumber" type="String" required>
+  Student's control number (enrollment ID). This is the official identifier used by the institution.
+  
+  Example: `"226W0487"`
+</ParamField>
+
+<ParamField path="name" type="String" required>
+  Full name of the student.
+  
+  Example: `"Arlyn Alfaro"`
+</ParamField>
+
+<ParamField path="career" type="String" required>
+  Name of the student's academic program or career path.
+  
+  Example: `"Ingeniería en Sistemas Computacionales"`
+</ParamField>
+
+<ParamField path="semester" type="Int" required>
+  Current semester number the student is enrolled in.
+  
+  Example: `8`
+</ParamField>
+
+<ParamField path="average" type="Double" required>
+  Student's cumulative grade point average.
+  
+  Example: `92.5`
+</ParamField>
+
+## Usage Example
+
+```kotlin
+val student = Student(
+    id = 1,
+    controlNumber = "226W0487",
+    name = "Arlyn Alfaro",
+    career = "Ingeniería en Sistemas Computacionales",
+    semester = 8,
+    average = 92.5
+)
+```
+
+## Usage in the App
+
+The `Student` model is primarily used in:
+
+- **Profile Screen** (`ProfileScreen.kt`): Displays student information including:
+  - Control number
+  - Current semester (shown in a stat card)
+  - Grade average (displayed prominently)
+  - Career information
+  
+  The profile screen accesses student data via `FakeData.student` and presents it in various UI components like StatCard and CareerCard.
+
+## Related Models
+
+- [ClassSession](/api/class-session) - Represents a class that a student attends
+- [Building](/api/building) - Represents campus buildings where classes take place

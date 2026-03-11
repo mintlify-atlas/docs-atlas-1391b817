@@ -1,0 +1,271 @@
+---
+title: Navigation System
+description: Understanding the navigation architecture using Navigation Compose
+---
+
+The TecNM Control Escolar app uses **Navigation Compose** to handle all screen transitions. This provides a declarative, type-safe way to navigate between screens while maintaining a single-activity architecture.
+
+## Navigation Routes
+
+All navigation routes are defined using a sealed class in `AppScreens.kt`:
+
+```kotlin AppScreens.kt
+package com.example.appcontrolescolar.navigation
+
+sealed class AppScreens(val route: String) {
+
+    object Home : AppScreens("home")
+
+    object Schedule : AppScreens("schedule")
+
+    object Map : AppScreens("map")
+
+    object Profile : AppScreens("profile")
+}
+```
+
+### Why Sealed Classes?
+
+<CardGroup cols={2}>
+  <Card title="Type Safety" icon="shield-check">
+    Compile-time safety ensures you can't navigate to non-existent routes
+  </Card>
+  <Card title="Autocomplete" icon="wand-magic-sparkles">
+    IDE provides autocomplete for all available screens
+  </Card>
+  <Card title="Exhaustive When" icon="list-check">
+    Kotlin ensures all cases are handled in when expressions
+  </Card>
+  <Card title="Refactor Friendly" icon="arrows-rotate">
+    Renaming routes updates all references automatically
+  </Card>
+</CardGroup>
+
+### Route Naming Convention
+
+Routes use lowercase strings matching the screen purpose:
+
+| Object | Route String | Screen |
+|--------|--------------|--------|
+| `AppScreens.Home` | `"home"` | HomeScreen |
+| `AppScreens.Schedule` | `"schedule"` | ScheduleScreen |
+| `AppScreens.Map` | `"map"` | MapScreen |
+| `AppScreens.Profile` | `"profile"` | ProfileScreen |
+
+## Navigation Graph Setup
+
+The `AppNavigation` composable sets up the navigation graph and integrates the bottom navigation bar:
+
+```kotlin AppNavigation.kt
+package com.example.appcontrolescolar.navigation
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.appcontrolescolar.ui.components.BottomBar
+import com.example.appcontrolescolar.ui.screens.HomeScreen
+import com.example.appcontrolescolar.ui.screens.MapScreen
+import com.example.appcontrolescolar.ui.screens.ProfileScreen
+import com.example.appcontrolescolar.ui.screens.ScheduleScreen
+
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    Scaffold(
+        bottomBar = {
+            BottomBar(navController)
+        }
+    ) { innerPadding ->
+
+        NavHost(
+            navController = navController,
+            startDestination = AppScreens.Home.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(AppScreens.Home.route) { HomeScreen() }
+            composable(AppScreens.Schedule.route) { ScheduleScreen() }
+            composable(AppScreens.Map.route) { MapScreen() }
+            composable(AppScreens.Profile.route) { ProfileScreen() }
+        }
+    }
+}
+```
+
+### Key Components
+
+<Steps>
+  <Step title="NavController Creation">
+    `rememberNavController()` creates and remembers the navigation controller across recompositions
+  </Step>
+  
+  <Step title="Scaffold Layout">
+    Material 3 Scaffold provides the app structure with a bottom bar
+  </Step>
+  
+  <Step title="NavHost Configuration">
+    Defines the navigation graph with all routes and their destinations
+  </Step>
+  
+  <Step title="Composable Destinations">
+    Each `composable()` call maps a route to a screen composable
+  </Step>
+</Steps>
+
+## Bottom Navigation Integration
+
+The navigation system is tightly integrated with the bottom navigation bar. The `BottomBar` component receives the `NavController` to handle navigation:
+
+```kotlin
+Scaffold(
+    bottomBar = {
+        BottomBar(navController)
+    }
+) { innerPadding ->
+    // NavHost uses innerPadding to avoid content overlap
+    NavHost(
+        modifier = Modifier.padding(innerPadding)
+        // ...
+    )
+}
+```
+
+<Note>
+The `innerPadding` ensures that screen content doesn't render underneath the bottom navigation bar.
+</Note>
+
+## Navigation Configuration
+
+### Start Destination
+
+The app launches to the Home screen by default:
+
+```kotlin
+NavHost(
+    navController = navController,
+    startDestination = AppScreens.Home.route,
+    // ...
+)
+```
+
+### Route-to-Screen Mapping
+
+Each route is mapped to its corresponding screen composable:
+
+```kotlin
+composable(AppScreens.Home.route) { HomeScreen() }
+composable(AppScreens.Schedule.route) { ScheduleScreen() }
+composable(AppScreens.Map.route) { MapScreen() }
+composable(AppScreens.Profile.route) { ProfileScreen() }
+```
+
+## Navigation Actions
+
+Navigation actions are handled in the `BottomBar` component. Here's how navigation is triggered:
+
+```kotlin BottomBar.kt (excerpt)
+NavigationBarItem(
+    selected = currentRoute == screen.route,
+    onClick = {
+        navController.navigate(screen.route) {
+            popUpTo(navController.graph.startDestinationId)
+            launchSingleTop = true
+        }
+    },
+    // ...
+)
+```
+
+### Navigation Options
+
+<ParamField path="popUpTo" type="Int">
+  Clears the back stack up to the start destination, preventing stack buildup when switching between bottom nav items
+</ParamField>
+
+<ParamField path="launchSingleTop" type="Boolean">
+  Prevents multiple instances of the same screen being added to the back stack
+</ParamField>
+
+## Current Route Detection
+
+The bottom bar highlights the current screen by observing the back stack:
+
+```kotlin
+val navBackStackEntry = navController.currentBackStackEntryAsState()
+val currentRoute = navBackStackEntry.value?.destination?.route
+```
+
+This is used to set the `selected` state of navigation items:
+
+```kotlin
+NavigationBarItem(
+    selected = currentRoute == screen.route,
+    // ...
+)
+```
+
+## Adding New Screens
+
+To add a new screen to the navigation system:
+
+<Steps>
+  <Step title="Define the Route">
+    Add a new object to the `AppScreens` sealed class:
+    ```kotlin
+    object NewScreen : AppScreens("new_screen")
+    ```
+  </Step>
+  
+  <Step title="Create the Screen Composable">
+    Implement the screen in `ui/screens/NewScreen.kt`
+  </Step>
+  
+  <Step title="Register in NavHost">
+    Add a composable entry in `AppNavigation.kt`:
+    ```kotlin
+    composable(AppScreens.NewScreen.route) { NewScreen() }
+    ```
+  </Step>
+  
+  <Step title="Update Bottom Bar (Optional)">
+    If the screen should appear in the bottom navigation, update `BottomBar.kt`
+  </Step>
+</Steps>
+
+## Future Enhancements
+
+<AccordionGroup>
+  <Accordion title="Navigation Arguments">
+    Future screens may need to pass arguments (e.g., class ID for detail screens). Navigation Compose supports type-safe arguments using route parameters.
+  </Accordion>
+  
+  <Accordion title="Deep Linking">
+    Deep links can be added to support navigation from notifications or external intents.
+  </Accordion>
+  
+  <Accordion title="Nested Navigation">
+    Complex features may benefit from nested navigation graphs to better organize related screens.
+  </Accordion>
+  
+  <Accordion title="Animation Transitions">
+    Custom animations can be added to enhance the user experience during screen transitions.
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<Card title="Single NavController" icon="sitemap">
+  Always use a single NavController for the entire app. Avoid creating multiple NavControllers as this complicates state management and back stack handling.
+</Card>
+
+<Card title="Stateless Screens" icon="circle-nodes">
+  Keep screen composables stateless and let the ViewModel or state hoisting handle business logic. This makes screens easier to navigate to and test.
+</Card>
+
+<Card title="Safe Navigation" icon="shield">
+  Always use the sealed class routes instead of string literals to prevent typos and ensure type safety.
+</Card>

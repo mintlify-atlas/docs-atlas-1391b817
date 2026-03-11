@@ -1,0 +1,399 @@
+---
+title: Working with Fake Data
+description: Understanding how the app uses FakeData.kt to simulate backend responses before Supabase integration
+---
+
+The TecNM Control Escolar app currently uses **mock data** to simulate backend responses. This allows UI development and testing without requiring a live backend connection.
+
+## Purpose of FakeData
+
+The `FakeData` object serves as a temporary data source that:
+
+- **Simulates API responses** with realistic student information
+- **Enables UI testing** across all screens without backend dependency
+- **Provides consistent test data** for development and debugging
+- **Will be replaced** with real Supabase queries in future releases
+
+<Note>
+  FakeData is located at: `app/src/main/java/com/example/appcontrolescolar/data/FakeData.kt`
+</Note>
+
+---
+
+## FakeData Structure
+
+The `FakeData` object is a Kotlin singleton that provides three main data collections:
+
+```kotlin
+package com.example.appcontrolescolar.data
+
+import com.example.appcontrolescolar.data.model.Building
+import com.example.appcontrolescolar.data.model.ClassSession
+import com.example.appcontrolescolar.data.model.Student
+
+object FakeData {
+    val student = Student(...)
+    val todayClasses = listOf<ClassSession>(...)
+    val buildings = listOf<Building>(...)
+}
+```
+
+### 1. Student Data
+
+Contains information about the logged-in student:
+
+```kotlin
+val student = Student(
+    id = 1,
+    controlNumber = "226W0487",
+    name = "Arlyn Alfaro",
+    career = "Ingeniería en Sistemas Computacionales",
+    semester = 8,
+    average = 92.5
+)
+```
+
+**Data Model:**
+
+```kotlin
+data class Student(
+    val id: Int,
+    val controlNumber: String,  // Student ID number
+    val name: String,
+    val career: String,          // Degree program
+    val semester: Int,
+    val average: Double          // GPA
+)
+```
+
+<Tip>
+  The `controlNumber` follows TecNM's standard format: `226W0487` (year + identifier)
+</Tip>
+
+### 2. Today's Classes
+
+A list of class sessions for the current day:
+
+```kotlin
+val todayClasses = listOf(
+    ClassSession(
+        id = 1,
+        subject = "Física I",
+        teacher = "Prof. A. Einstein",
+        classroom = "Aula A2",
+        day = "Martes",
+        startHour = "08:00",
+        endHour = "09:00",
+        isCurrent = false
+    ),
+    ClassSession(
+        id = 2,
+        subject = "Programación Orientada a Objetos",
+        teacher = "Prof. G. Hopper",
+        classroom = "Lab 3",
+        day = "Martes",
+        startHour = "10:00",
+        endHour = "12:00",
+        isCurrent = true  // Currently active class
+    ),
+    // ... more classes
+)
+```
+
+**Data Model:**
+
+```kotlin
+data class ClassSession(
+    val id: Int,
+    val subject: String,
+    val teacher: String,
+    val classroom: String,
+    val day: String,
+    val startHour: String,
+    val endHour: String,
+    val isCurrent: Boolean = false  // Highlights active class
+)
+```
+
+<Note>
+  The `isCurrent` flag determines which class is displayed as "Clase actual" on the HomeScreen.
+</Note>
+
+### 3. Campus Buildings
+
+A list of campus locations for the map feature:
+
+```kotlin
+val buildings = listOf(
+    Building(
+        id = 1,
+        name = "Edificio A",
+        description = "Aulas generales",
+        category = "Aulas",
+        distance = "120 m"
+    ),
+    Building(
+        id = 2,
+        name = "Laboratorio 3",
+        description = "Prácticas de computación",
+        category = "Labs",
+        distance = "180 m"
+    ),
+    Building(
+        id = 3,
+        name = "Cafetería Central",
+        description = "Zona de alimentos",
+        category = "Cafetería",
+        distance = "220 m"
+    )
+)
+```
+
+**Data Model:**
+
+```kotlin
+data class Building(
+    val id: Int,
+    val name: String,
+    val description: String,
+    val category: String,  // "Aulas", "Labs", "Cafetería"
+    val distance: String   // Simulated distance from user
+)
+```
+
+---
+
+## How Screens Use FakeData
+
+Screens import and reference `FakeData` directly:
+
+### HomeScreen Example
+
+```kotlin
+import com.example.appcontrolescolar.data.FakeData
+
+@Composable
+fun HomeScreen() {
+    // Uses student name for greeting
+    Text(text = "Hola, ${FakeData.student.name}")
+    
+    // Displays current class
+    val currentClass = FakeData.todayClasses.find { it.isCurrent }
+    currentClass?.let {
+        CurrentClassCard(
+            subject = it.subject,
+            teacher = it.teacher,
+            classroom = it.classroom
+        )
+    }
+    
+    // Shows upcoming classes
+    FakeData.todayClasses.filter { !it.isCurrent }.forEach { classSession ->
+        NextClassItem(
+            hour = classSession.startHour,
+            subject = classSession.subject,
+            classroom = classSession.classroom,
+            teacher = classSession.teacher
+        )
+    }
+}
+```
+
+### ProfileScreen Example
+
+```kotlin
+import com.example.appcontrolescolar.data.FakeData
+
+@Composable
+fun ProfileScreen() {
+    val student = FakeData.student
+    
+    Column {
+        Text(text = student.name)
+        Text(text = student.controlNumber)
+        Text(text = "Semester: ${student.semester}")
+        Text(text = "Average: ${student.average}")
+        Text(text = student.career)
+    }
+}
+```
+
+See ProfileScreen.kt:46 for the full implementation.
+
+### ScheduleScreen Example
+
+```kotlin
+import com.example.appcontrolescolar.data.FakeData
+
+@Composable
+fun ScheduleScreen() {
+    Column {
+        FakeData.todayClasses.forEach { classSession ->
+            TimeClassCard(
+                hour = classSession.startHour,
+                endHour = classSession.endHour,
+                subject = classSession.subject,
+                teacher = classSession.teacher,
+                tag = classSession.classroom
+            )
+        }
+    }
+}
+```
+
+### MapScreen Example
+
+```kotlin
+import com.example.appcontrolescolar.data.FakeData
+
+@Composable
+fun MapScreen() {
+    Column {
+        FakeData.buildings.forEach { building ->
+            BuildingCard(
+                name = building.name,
+                description = building.description,
+                distance = building.distance
+            )
+        }
+    }
+}
+```
+
+---
+
+## Modifying Test Data
+
+To change test data during development:
+
+<Steps>
+  <Step title="Open FakeData.kt">
+    Navigate to:
+    ```
+    app/src/main/java/com/example/appcontrolescolar/data/FakeData.kt
+    ```
+  </Step>
+
+  <Step title="Edit the Data">
+    Modify any field in the `student`, `todayClasses`, or `buildings` objects:
+    
+    ```kotlin
+    val student = Student(
+        id = 1,
+        controlNumber = "226W0999",  // Change student ID
+        name = "Your Name",           // Change name
+        career = "Ingeniería en Sistemas Computacionales",
+        semester = 6,                 // Change semester
+        average = 95.0                // Change GPA
+    )
+    ```
+  </Step>
+
+  <Step title="Rebuild and Run">
+    The app will reflect changes immediately:
+    
+    1. **Hot reload** (if using Android Studio's Apply Changes)
+    2. Or **rebuild** the project: `Build → Rebuild Project`
+    3. **Rerun** the app
+  </Step>
+</Steps>
+
+<Warning>
+  Changes to `FakeData.kt` are for development only. Production data will come from Supabase.
+</Warning>
+
+---
+
+## Adding New Classes
+
+To test with more class sessions:
+
+```kotlin
+val todayClasses = listOf(
+    // ... existing classes
+    ClassSession(
+        id = 5,
+        subject = "Arquitectura de Computadoras",
+        teacher = "Prof. Alan Turing",
+        classroom = "Lab 1",
+        day = "Martes",
+        startHour = "16:00",
+        endHour = "18:00",
+        isCurrent = false
+    )
+)
+```
+
+<Tip>
+  Set `isCurrent = true` on one class to test the "Clase actual" card on HomeScreen.
+</Tip>
+
+---
+
+## Adding New Buildings
+
+To test map functionality with more locations:
+
+```kotlin
+val buildings = listOf(
+    // ... existing buildings
+    Building(
+        id = 4,
+        name = "Biblioteca Central",
+        description = "Recursos académicos y estudio",
+        category = "Servicios",
+        distance = "95 m"
+    ),
+    Building(
+        id = 5,
+        name = "Canchas Deportivas",
+        description = "Instalaciones deportivas",
+        category = "Deportes",
+        distance = "310 m"
+    )
+)
+```
+
+---
+
+## Transition to Real Data
+
+<Note>
+  FakeData will be replaced when Supabase integration is complete. See the [Supabase Integration guide](/guides/supabase-integration) for the migration roadmap.
+</Note>
+
+When switching to real data:
+
+1. **Repository pattern** will be introduced
+2. **FakeData** will be wrapped in a repository interface
+3. **Supabase queries** will replace direct `FakeData` access
+4. **Data models** will remain the same
+
+```kotlin
+// Future implementation
+interface StudentRepository {
+    suspend fun getStudent(): Student
+    suspend fun getTodayClasses(): List<ClassSession>
+    suspend fun getBuildings(): List<Building>
+}
+
+class SupabaseRepository : StudentRepository {
+    override suspend fun getStudent(): Student {
+        // Supabase query here
+    }
+}
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Supabase Integration" icon="database" href="/guides/supabase-integration">
+    Learn about the planned backend integration
+  </Card>
+  
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Solve common issues with data and UI
+  </Card>
+</CardGroup>

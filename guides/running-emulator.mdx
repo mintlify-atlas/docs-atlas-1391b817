@@ -1,0 +1,201 @@
+---
+title: Running the App on Emulator
+description: Learn how to set up and run the TecNM Control Escolar app on Android emulator or physical device
+---
+
+This guide walks you through running the TecNM Control Escolar app on an Android emulator or physical device.
+
+## Prerequisites
+
+Before running the app, ensure you have:
+
+- **Android Studio Iguana or higher** installed
+- **Android SDK** (API 24 or higher)
+- **Android Emulator** (included with Android Studio)
+- Project successfully opened and Gradle sync completed
+
+---
+
+## Option 1: Running on Android Emulator
+
+<Steps>
+  <Step title="Open Device Manager">
+    In Android Studio, navigate to:
+    
+    ```
+    Tools → Device Manager
+    ```
+    
+    This opens the Android Virtual Device (AVD) Manager where you can create and manage emulators.
+  </Step>
+
+  <Step title="Create a Virtual Device">
+    If you don't have an emulator yet:
+    
+    1. Click **Create Device**
+    2. Select a device definition (Pixel devices recommended)
+    3. Choose a system image:
+       - **Recommended**: API 34 (Android 14) or higher
+       - **Minimum**: API 24 (Android 7.0)
+    4. Click **Finish**
+    
+    <Tip>
+      Use Pixel 5 or Pixel 6 for best compatibility with modern Android apps.
+    </Tip>
+  </Step>
+
+  <Step title="Start the Emulator">
+    1. In Device Manager, find your virtual device
+    2. Click the **Play** (▶) button next to the device name
+    3. Wait for the emulator to boot up completely
+    
+    <Note>
+      The first boot may take several minutes. Subsequent starts will be faster.
+    </Note>
+  </Step>
+
+  <Step title="Run the App">
+    1. Ensure the emulator is selected in the device dropdown (top toolbar)
+    2. Click the **Run** button (green play icon) or press `Shift + F10`
+    3. Android Studio will build and install the app
+    4. The app will launch automatically on the emulator
+    
+    ```kotlin
+    // You should see the HomeScreen with the greeting
+    "Hola, Arlyn"
+    "Aquí está tu horario de hoy"
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Option 2: Running on Physical Device
+
+Testing on a real device provides the best performance and user experience feedback.
+
+<Steps>
+  <Step title="Enable Developer Options">
+    On your Android device:
+    
+    1. Go to **Settings → About Phone**
+    2. Tap **Build Number** 7 times
+    3. You'll see a message: "You are now a developer!"
+  </Step>
+
+  <Step title="Enable USB Debugging">
+    1. Go to **Settings → System → Developer Options**
+    2. Enable **USB Debugging**
+    3. (Optional) Enable **Stay Awake** to keep screen on while developing
+    
+    <Warning>
+      Remember to disable USB Debugging when not developing for security.
+    </Warning>
+  </Step>
+
+  <Step title="Connect Device via USB">
+    1. Connect your phone to your computer using a USB cable
+    2. On your device, authorize the connection:
+       - A prompt will appear: "Allow USB debugging?"
+       - Tap **Allow** or **OK**
+    3. In Android Studio, your device should appear in the device dropdown
+  </Step>
+
+  <Step title="Run the App">
+    1. Select your physical device from the dropdown
+    2. Click **Run** or press `Shift + F10`
+    3. The app will install and launch on your device
+  </Step>
+</Steps>
+
+---
+
+## Common Emulator Issues
+
+<Accordion title="Emulator is very slow">
+  **Solution 1: Enable Hardware Acceleration**
+  
+  - **Windows**: Install Intel HAXM or enable Hyper-V
+  - **Mac**: Ensure Hypervisor.framework is enabled
+  - **Linux**: Install KVM
+  
+  **Solution 2: Allocate More RAM**
+  
+  1. In Device Manager, click **Edit** (pencil icon) on your AVD
+  2. Click **Show Advanced Settings**
+  3. Increase RAM to at least 2048 MB
+  4. Click **Finish** and restart the emulator
+</Accordion>
+
+<Accordion title="Emulator won't start">
+  Check the following:
+  
+  1. **Verify virtualization is enabled** in BIOS/UEFI
+  2. **Close other virtual machines** (VirtualBox, VMware)
+  3. **Update Android Emulator**:
+     ```
+     Tools → SDK Manager → SDK Tools → Android Emulator
+     ```
+  4. **Delete and recreate the AVD** if corrupted
+</Accordion>
+
+<Accordion title="App doesn't appear on emulator">
+  Try these steps:
+  
+  1. **Clean and rebuild** the project:
+     ```
+     Build → Clean Project
+     Build → Rebuild Project
+     ```
+  
+  2. **Invalidate caches**:
+     ```
+     File → Invalidate Caches → Invalidate and Restart
+     ```
+  
+  3. **Check Logcat** for errors:
+     ```
+     View → Tool Windows → Logcat
+     ```
+</Accordion>
+
+<Accordion title="Device not detected (physical device)">
+  **On Windows:**
+  - Install device-specific USB drivers from manufacturer
+  
+  **On Mac/Linux:**
+  - Try a different USB cable
+  - Ensure USB debugging is enabled
+  
+  **All platforms:**
+  - Revoke USB debugging authorizations:
+    ```
+    Settings → Developer Options → Revoke USB debugging authorizations
+    ```
+  - Reconnect and authorize again
+</Accordion>
+
+---
+
+## Emulator Performance Tips
+
+<Tip>
+  **For faster development:**
+  
+  - Use **Cold Boot** only when necessary
+  - Enable **Quick Boot** (default) for faster subsequent starts
+  - Keep emulator running during development
+  - Use **Instant Run** / **Apply Changes** to avoid full reinstalls
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Understanding Fake Data" icon="database" href="/guides/fake-data">
+    Learn how test data is structured in the app
+  </Card>
+  
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Solve common development issues
+  </Card>
+</CardGroup>

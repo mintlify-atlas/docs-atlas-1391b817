@@ -1,0 +1,135 @@
+---
+title: "Building"
+description: "Data model representing a campus building or facility"
+---
+
+## Overview
+
+The `Building` data class represents a physical building or facility on the TecNM campus, including its location information, purpose, and distance from the user's current position.
+
+## Data Class Definition
+
+```kotlin
+package com.example.appcontrolescolar.data.model
+
+data class Building(
+    val id: Int,
+    val name: String,
+    val description: String,
+    val category: String,
+    val distance: String
+)
+```
+
+## Properties
+
+<ParamField path="id" type="Int" required>
+  Unique identifier for the building.
+</ParamField>
+
+<ParamField path="name" type="String" required>
+  Official name or designation of the building.
+  
+  Example: `"Edificio A"`, `"Laboratorio 3"`, `"Cafetería Central"`
+</ParamField>
+
+<ParamField path="description" type="String" required>
+  Brief description of the building's purpose or function.
+  
+  Example: `"Aulas generales"`, `"Prácticas de computación"`
+</ParamField>
+
+<ParamField path="category" type="String" required>
+  Classification or type of the building.
+  
+  Common values:
+  - `"Aulas"` - Classroom buildings
+  - `"Labs"` - Laboratory facilities
+  - `"Cafetería"` - Food service areas
+</ParamField>
+
+<ParamField path="distance" type="String" required>
+  Distance from the user's current location to the building, formatted as a string with units.
+  
+  Example: `"120 m"`, `"180 m"`
+</ParamField>
+
+## Usage Example
+
+```kotlin
+val building = Building(
+    id = 2,
+    name = "Laboratorio 3",
+    description = "Prácticas de computación",
+    category = "Labs",
+    distance = "180 m"
+)
+```
+
+## Example from FakeData
+
+```kotlin
+val buildings = listOf(
+    Building(
+        id = 1,
+        name = "Edificio A",
+        description = "Aulas generales",
+        category = "Aulas",
+        distance = "120 m"
+    ),
+    Building(
+        id = 2,
+        name = "Laboratorio 3",
+        description = "Prácticas de computación",
+        category = "Labs",
+        distance = "180 m"
+    ),
+    Building(
+        id = 3,
+        name = "Cafetería Central",
+        description = "Zona de alimentos",
+        category = "Cafetería",
+        distance = "220 m"
+    )
+)
+```
+
+## Usage in the App
+
+The `Building` model is primarily used in the **Map Screen** (`MapScreen.kt`):
+
+### Campus Locator Features
+
+- **Building Search**: Users can search for buildings by name through the search bar
+
+- **Category Filtering**: Buildings can be filtered by category:
+  - "Todos" (All)
+  - "Aulas" (Classrooms)
+  - "Labs" (Laboratories)
+  - "Cafetería" (Cafeteria)
+
+- **Nearby Buildings List**: Displays buildings sorted by proximity with:
+  - Building name prominently displayed
+  - Description and distance shown as subtitle (e.g., "Aulas generales · 120 m")
+  - Category-specific icon:
+    - `Icons.Outlined.Apartment` for classroom buildings
+    - `Icons.Outlined.Science` for laboratories
+    - `Icons.Outlined.Coffee` for cafeteria
+  - Color-coded icons based on building type
+
+- **Campus Map Visualization**: Buildings are rendered on an interactive campus map with:
+  - Color-coded boxes representing each building
+  - Building names displayed on the map
+  - Visual indicators for building locations
+
+### Integration with ClassSession
+
+Building information helps students locate their classes:
+- ClassSession's `classroom` property references rooms within buildings
+- Students can use the map to find the building where their next class is held
+- Distance information helps with navigation and time management between classes
+
+## Related Models
+
+- [ClassSession](/api/class-session) - Classes that take place in campus buildings
+- [Student](/api/student) - Students navigating between buildings

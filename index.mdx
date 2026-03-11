@@ -1,97 +1,139 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: TecNM Control Escolar
+description: Android mobile app for TecNM students to view schedules, locate campus buildings, and manage academic information
 ---
 
-## Setting up
+<div style={{
+  background: 'linear-gradient(135deg, #f5f9f5 0%, #d9ebe3 100%)',
+  borderRadius: '16px',
+  padding: '48px 32px',
+  marginBottom: '32px',
+  border: '1px solid #e0e0e0'
+}}>
+  <div style={{
+    maxWidth: '800px',
+    margin: '0 auto',
+    textAlign: 'center'
+  }}>
+    <h1 style={{
+      fontSize: '48px',
+      fontWeight: '700',
+      color: '#202124',
+      marginBottom: '16px',
+      fontFamily: 'Google Sans, system-ui, -apple-system, sans-serif'
+    }}>
+      TecNM Control Escolar
+    </h1>
+    <p style={{
+      fontSize: '20px',
+      color: '#202124',
+      marginBottom: '32px',
+      opacity: '0.8',
+      lineHeight: '1.6'
+    }}>
+      Modern Android app for TecNM students to manage their academic life — from class schedules to campus navigation
+    </p>
+    <div style={{
+      display: 'flex',
+      gap: '16px',
+      justifyContent: 'center',
+      flexWrap: 'wrap'
+    }}>
+      <a href="/introduction" style={{
+        display: 'inline-block',
+        padding: '12px 32px',
+        background: '#000000',
+        color: '#ffffff',
+        borderRadius: '20px',
+        textDecoration: 'none',
+        fontWeight: '500',
+        fontSize: '16px'
+      }}>
+        Get Started
+      </a>
+      <a href="https://github.com/Jesus-Puertos/AppTECNMControlEscolar" style={{
+        display: 'inline-block',
+        padding: '12px 32px',
+        background: '#ffffff',
+        color: '#000000',
+        borderRadius: '20px',
+        textDecoration: 'none',
+        fontWeight: '500',
+        fontSize: '16px',
+        border: '1px solid #e0e0e0'
+      }}>
+        View on GitHub
+      </a>
+    </div>
+  </div>
+</div>
 
-Get your documentation site up and running in minutes.
+## Key Features
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Class Schedule" icon="calendar" href="/features/schedule">
+    View your daily schedule with current and upcoming classes in real-time
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Campus Map" icon="map" href="/features/campus-map">
+    Locate buildings across campus with distance information
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Student Profile" icon="user" href="/features/student-profile">
+    Access your academic information including GPA and enrollment details
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="QR Attendance" icon="qrcode" href="/features/qr-attendance">
+    Scan QR codes to register attendance quickly and easily
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Built with Modern Android Technologies
 
-Everything you need to create world-class documentation.
+TecNM Control Escolar is built entirely in **Kotlin** with **Jetpack Compose**, leveraging Material Design 3 for a beautiful, native Android experience.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+<CardGroup cols={3}>
+  <Card title="Jetpack Compose" icon="layer-group">
+    Modern declarative UI toolkit for building native Android interfaces
   </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
+  <Card title="Material Design 3" icon="palette">
+    Latest design system with dynamic theming and adaptive layouts
   </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
+  <Card title="Navigation Compose" icon="route">
+    Type-safe navigation between screens with smooth transitions
   </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+</CardGroup>
 
-## Need inspiration?
+## Quick Start
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<Steps>
+  <Step title="Install Android Studio">
+    Download Android Studio Iguana or later from the official Android developer site
+  </Step>
+  <Step title="Clone the repository">
+    Clone the project from GitHub and open it in Android Studio
+  </Step>
+  <Step title="Run the app">
+    Start the Android emulator or connect a physical device and hit Run
+  </Step>
+</Steps>
+
+<Note>
+The app currently uses fake data for development. Supabase integration for backend connectivity is planned for future releases.
+</Note>
+
+## Get Started
+
+Ready to explore the app or contribute to development?
+
+<CardGroup cols={2}>
+  <Card title="Installation Guide" icon="download" href="/installation">
+    Step-by-step instructions to set up the development environment
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get the app running on your device in minutes
+  </Card>
+  <Card title="Architecture Overview" icon="sitemap" href="/development/architecture">
+    Learn about the app's structure and design patterns
+  </Card>
+  <Card title="API Reference" icon="code" href="/api/student">
+    Explore the data models, screens, and components
+  </Card>
+</CardGroup>

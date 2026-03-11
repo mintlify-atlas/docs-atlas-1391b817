@@ -1,0 +1,274 @@
+---
+title: Data Models
+description: Core data structures and domain models used in the TecNM Control Escolar app
+---
+
+The app uses simple, immutable data classes to represent domain entities. All models are located in the `data/model/` package and use Kotlin data classes for automatic equals, hashCode, and copy implementations.
+
+## Student Model
+
+Represents a student enrolled in the TecNM institution.
+
+```kotlin Student.kt
+package com.example.appcontrolescolar.data.model
+
+data class Student(
+    val id: Int,
+    val controlNumber: String,
+    val name: String,
+    val career: String,
+    val semester: Int,
+    val average: Double
+)
+```
+
+### Fields
+
+<ParamField path="id" type="Int" required>
+  Unique identifier for the student in the database
+</ParamField>
+
+<ParamField path="controlNumber" type="String" required>
+  Student's control number (matrícula) - unique identifier assigned by TecNM. Format: `226W0487`
+</ParamField>
+
+<ParamField path="name" type="String" required>
+  Full name of the student
+</ParamField>
+
+<ParamField path="career" type="String" required>
+  Academic program the student is enrolled in (e.g., "Ingeniería en Sistemas Computacionales")
+</ParamField>
+
+<ParamField path="semester" type="Int" required>
+  Current semester number (1-12 typically)
+</ParamField>
+
+<ParamField path="average" type="Double" required>
+  Overall GPA/average grade (0.0-100.0 scale)
+</ParamField>
+
+### Usage Example
+
+```kotlin
+val student = Student(
+    id = 1,
+    controlNumber = "226W0487",
+    name = "Arlyn Alfaro",
+    career = "Ingeniería en Sistemas Computacionales",
+    semester = 8,
+    average = 92.5
+)
+```
+
+## ClassSession Model
+
+Represents a single class session in a student's schedule.
+
+```kotlin ClassSession.kt
+package com.example.appcontrolescolar.data.model
+
+data class ClassSession(
+    val id: Int,
+    val subject: String,
+    val teacher: String,
+    val classroom: String,
+    val day: String,
+    val startHour: String,
+    val endHour: String,
+    val isCurrent: Boolean = false
+)
+```
+
+### Fields
+
+<ParamField path="id" type="Int" required>
+  Unique identifier for the class session
+</ParamField>
+
+<ParamField path="subject" type="String" required>
+  Name of the course/subject (e.g., "Programación Orientada a Objetos")
+</ParamField>
+
+<ParamField path="teacher" type="String" required>
+  Name of the professor teaching the class
+</ParamField>
+
+<ParamField path="classroom" type="String" required>
+  Location where the class takes place (e.g., "Lab 3", "Aula A2")
+</ParamField>
+
+<ParamField path="day" type="String" required>
+  Day of the week the class occurs (e.g., "Martes")
+</ParamField>
+
+<ParamField path="startHour" type="String" required>
+  Class start time in 24-hour format (e.g., "10:00")
+</ParamField>
+
+<ParamField path="endHour" type="String" required>
+  Class end time in 24-hour format (e.g., "12:00")
+</ParamField>
+
+<ParamField path="isCurrent" type="Boolean" default="false">
+  Flag indicating if this is the currently active class session
+</ParamField>
+
+### Usage Example
+
+```kotlin
+val currentClass = ClassSession(
+    id = 2,
+    subject = "Programación Orientada a Objetos",
+    teacher = "Prof. G. Hopper",
+    classroom = "Lab 3",
+    day = "Martes",
+    startHour = "10:00",
+    endHour = "12:00",
+    isCurrent = true
+)
+```
+
+## Building Model
+
+Represents a building or location on the campus.
+
+```kotlin Building.kt
+package com.example.appcontrolescolar.data.model
+
+data class Building(
+    val id: Int,
+    val name: String,
+    val description: String,
+    val category: String,
+    val distance: String
+)
+```
+
+### Fields
+
+<ParamField path="id" type="Int" required>
+  Unique identifier for the building
+</ParamField>
+
+<ParamField path="name" type="String" required>
+  Name of the building (e.g., "Edificio A", "Laboratorio 3")
+</ParamField>
+
+<ParamField path="description" type="String" required>
+  Brief description of the building's purpose (e.g., "Aulas generales")
+</ParamField>
+
+<ParamField path="category" type="String" required>
+  Type or category of building (e.g., "Aulas", "Labs", "Cafetería")
+</ParamField>
+
+<ParamField path="distance" type="String" required>
+  Distance from current location as a formatted string (e.g., "120 m")
+</ParamField>
+
+### Usage Example
+
+```kotlin
+val building = Building(
+    id = 2,
+    name = "Laboratorio 3",
+    description = "Prácticas de computación",
+    category = "Labs",
+    distance = "180 m"
+)
+```
+
+## FakeData Provider
+
+For development and testing, the app uses `FakeData.kt` to provide mock data instances:
+
+```kotlin FakeData.kt
+package com.example.appcontrolescolar.data
+
+import com.example.appcontrolescolar.data.model.Building
+import com.example.appcontrolescolar.data.model.ClassSession
+import com.example.appcontrolescolar.data.model.Student
+
+object FakeData {
+
+    val student = Student(
+        id = 1,
+        controlNumber = "226W0487",
+        name = "Arlyn Alfaro",
+        career = "Ingeniería en Sistemas Computacionales",
+        semester = 8,
+        average = 92.5
+    )
+
+    val todayClasses = listOf(
+        ClassSession(
+            id = 1,
+            subject = "Física I",
+            teacher = "Prof. A. Einstein",
+            classroom = "Aula A2",
+            day = "Martes",
+            startHour = "08:00",
+            endHour = "09:00",
+            isCurrent = false
+        ),
+        ClassSession(
+            id = 2,
+            subject = "Programación Orientada a Objetos",
+            teacher = "Prof. G. Hopper",
+            classroom = "Lab 3",
+            day = "Martes",
+            startHour = "10:00",
+            endHour = "12:00",
+            isCurrent = true
+        ),
+        // ... more classes
+    )
+
+    val buildings = listOf(
+        Building(
+            id = 1,
+            name = "Edificio A",
+            description = "Aulas generales",
+            category = "Aulas",
+            distance = "120 m"
+        ),
+        // ... more buildings
+    )
+}
+```
+
+### Usage in Screens
+
+Screens import and use FakeData directly:
+
+```kotlin
+import com.example.appcontrolescolar.data.FakeData
+
+@Composable
+fun HomeScreen() {
+    val student = FakeData.student
+    val classes = FakeData.todayClasses
+    // Use the data...
+}
+```
+
+<Warning>
+FakeData is temporary and will be replaced with a proper repository layer connected to Supabase in the future.
+</Warning>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Why Data Classes?">
+    Kotlin data classes automatically generate `equals()`, `hashCode()`, `toString()`, and `copy()` methods, reducing boilerplate code and ensuring consistency.
+  </Accordion>
+  
+  <Accordion title="Why Immutable Models?">
+    Using `val` for all properties makes models immutable, which is essential for proper state management in Compose. Immutable data prevents accidental mutations and makes state changes explicit.
+  </Accordion>
+  
+  <Accordion title="Default Parameters">
+    The `isCurrent` parameter in `ClassSession` has a default value of `false`, making it optional and improving API ergonomics.
+  </Accordion>
+</AccordionGroup>

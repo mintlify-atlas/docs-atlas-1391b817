@@ -1,0 +1,687 @@
+---
+title: Troubleshooting Guide
+description: Solutions to common issues when developing the TecNM Control Escolar app
+---
+
+This guide covers common problems you might encounter while developing or running the TecNM Control Escolar Android app.
+
+---
+
+## Build & Sync Issues
+
+<Accordion title="Gradle Sync Failed">
+  **Symptoms:**
+  - "Gradle sync failed" error in Android Studio
+  - Build toolbar is grayed out
+  - Can't run the app
+  
+  **Solution 1: Manual Sync**
+  
+  ```
+  File → Sync Project with Gradle Files
+  ```
+  
+  Wait for the sync to complete (may take 1-2 minutes).
+  
+  **Solution 2: Clean Project**
+  
+  ```
+  Build → Clean Project
+  Build → Rebuild Project
+  ```
+  
+  **Solution 3: Invalidate Caches**
+  
+  ```
+  File → Invalidate Caches → Invalidate and Restart
+  ```
+  
+  This clears all cached data and restarts Android Studio.
+  
+  **Solution 4: Check Gradle Wrapper**
+  
+  Ensure `gradle-wrapper.properties` is correct:
+  
+  ```properties
+  # gradle/wrapper/gradle-wrapper.properties
+  distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
+  ```
+  
+  <Note>
+    The project includes Gradle Wrapper, so you don't need to install Gradle manually.
+  </Note>
+</Accordion>
+
+<Accordion title="Dependency Resolution Failed">
+  **Symptoms:**
+  - "Could not resolve..." errors
+  - Missing library errors
+  
+  **Solution 1: Check Internet Connection**
+  
+  Gradle needs internet to download dependencies on first build.
+  
+  **Solution 2: Clear Gradle Cache**
+  
+  Close Android Studio and delete:
+  
+  ```bash
+  # On Windows
+  rmdir /s %USERPROFILE%\.gradle\caches
+  
+  # On Mac/Linux
+  rm -rf ~/.gradle/caches
+  ```
+  
+  Then reopen the project and sync.
+  
+  **Solution 3: Verify Dependencies**
+  
+  Check `app/build.gradle.kts` contains:
+  
+  ```kotlin
+  dependencies {
+      implementation("androidx.compose.material:material-icons-extended")
+      implementation("androidx.navigation:navigation-compose:2.7.7")
+      implementation(libs.androidx.core.ktx)
+      implementation(libs.androidx.lifecycle.runtime.ktx)
+      implementation(libs.androidx.activity.compose)
+      implementation(platform(libs.androidx.compose.bom))
+      implementation(libs.androidx.compose.ui)
+      implementation(libs.androidx.compose.ui.graphics)
+      implementation(libs.androidx.compose.ui.tooling.preview)
+      implementation(libs.androidx.compose.material3)
+      // ... test dependencies
+  }
+  ```
+</Accordion>
+
+<Accordion title="Build Takes Too Long">
+  **Symptoms:**
+  - Gradle build takes 5+ minutes
+  - Android Studio becomes unresponsive
+  
+  **Solution 1: Enable Gradle Daemon**
+  
+  Add to `gradle.properties`:
+  
+  ```properties
+  org.gradle.daemon=true
+  org.gradle.parallel=true
+  org.gradle.caching=true
+  org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
+  ```
+  
+  **Solution 2: Use Build Cache**
+  
+  ```
+  Settings → Build, Execution, Deployment → Gradle
+  ☑ Enable offline mode (if no dependency changes)
+  ```
+  
+  **Solution 3: Exclude Unnecessary Modules**
+  
+  Disable unused modules in Project Structure:
+  
+  ```
+  File → Project Structure → Modules
+  ```
+</Accordion>
+
+---
+
+## UI & Compose Issues
+
+<Accordion title="Icons Not Found / Missing Icons">
+  **Symptoms:**
+  - "Unresolved reference: Icons" error
+  - Missing icon imports
+  - Compose compiler errors about Material Icons
+  
+  **Root Cause:**
+  
+  The app uses Material Icons Extended, which is not included by default.
+  
+  **Solution:**
+  
+  Add the dependency in `app/build.gradle.kts`:
+  
+  ```kotlin
+  dependencies {
+      implementation("androidx.compose.material:material-icons-extended")
+      // ... other dependencies
+  }
+  ```
+  
+  Then click **Sync Now** in the notification bar.
+  
+  <Tip>
+    This dependency is already included in the project. If you're seeing this error, try syncing Gradle.
+  </Tip>
+  
+  **Verify Icon Imports:**
+  
+  ```kotlin
+  import androidx.compose.material.icons.Icons
+  import androidx.compose.material.icons.filled.Notifications
+  import androidx.compose.material.icons.outlined.Backpack
+  import androidx.compose.material.icons.outlined.School
+  ```
+</Accordion>
+
+<Accordion title="Compose Preview Not Working">
+  **Symptoms:**
+  - "No preview available" in Android Studio
+  - Preview panel is blank or shows errors
+  
+  **Solution 1: Add Preview Annotation**
+  
+  ```kotlin
+  @Preview(showBackground = true)
+  @Composable
+  fun HomeScreenPreview() {
+      TecNMTheme {
+          HomeScreen()
+      }
+  }
+  ```
+  
+  **Solution 2: Refresh Preview**
+  
+  Click the **Refresh** icon in the Preview panel, or:
+  
+  ```
+  Build → Refresh All Previews
+  ```
+  
+  **Solution 3: Check Preview Dependencies**
+  
+  Ensure you have:
+  
+  ```kotlin
+  dependencies {
+      implementation(libs.androidx.compose.ui.tooling.preview)
+      debugImplementation(libs.androidx.compose.ui.tooling)
+  }
+  ```
+  
+  **Solution 4: Switch to Interactive Mode**
+  
+  Click the **Interactive** button in Preview to enable interactions.
+</Accordion>
+
+<Accordion title="App Crashes on Launch">
+  **Symptoms:**
+  - App opens then immediately closes
+  - "Unfortunately, app has stopped" message
+  
+  **Solution 1: Check Logcat**
+  
+  Open Logcat to see the crash reason:
+  
+  ```
+  View → Tool Windows → Logcat
+  ```
+  
+  Filter by "Error" level and look for stack traces.
+  
+  **Solution 2: Common Crash Causes**
+  
+  - **Missing navigation route**: Ensure all routes in `AppScreens.kt` are defined in `AppNavigation.kt`
+  - **NullPointerException**: Check if `FakeData` is accessible
+  - **Theme issues**: Ensure `MainActivity` wraps content in theme:
+  
+  ```kotlin
+  setContent {
+      TecNMTheme {
+          AppNavigation()
+      }
+  }
+  ```
+  
+  **Solution 3: Clear App Data**
+  
+  On emulator/device:
+  
+  ```
+  Settings → Apps → AppTECNMControlEscolar → Storage → Clear Data
+  ```
+  
+  Then reinstall the app.
+</Accordion>
+
+<Accordion title="Navigation Not Working">
+  **Symptoms:**
+  - Bottom navigation doesn't switch screens
+  - Clicking tabs does nothing
+  
+  **Solution 1: Verify NavController**
+  
+  Check `AppNavigation.kt` has proper setup:
+  
+  ```kotlin
+  @Composable
+  fun AppNavigation() {
+      val navController = rememberNavController()
+      
+      Scaffold(
+          bottomBar = { BottomBar(navController = navController) }
+      ) {
+          NavHost(
+              navController = navController,
+              startDestination = AppScreens.HomeScreen.route
+          ) {
+              composable(AppScreens.HomeScreen.route) { HomeScreen() }
+              composable(AppScreens.ScheduleScreen.route) { ScheduleScreen() }
+              composable(AppScreens.MapScreen.route) { MapScreen() }
+              composable(AppScreens.ProfileScreen.route) { ProfileScreen() }
+          }
+      }
+  }
+  ```
+  
+  **Solution 2: Check Route Names**
+  
+  Ensure routes match between `AppScreens.kt` and navigation calls:
+  
+  ```kotlin
+  // AppScreens.kt
+  sealed class AppScreens(val route: String) {
+      object HomeScreen : AppScreens("home")
+      object ScheduleScreen : AppScreens("schedule")
+      // ...
+  }
+  
+  // BottomBar.kt
+  navController.navigate(AppScreens.HomeScreen.route)
+  ```
+</Accordion>
+
+---
+
+## Emulator Issues
+
+<Accordion title="Emulator Won't Start">
+  **Symptoms:**
+  - Emulator shows loading screen indefinitely
+  - "The emulator process has terminated" error
+  
+  **Solution 1: Enable Hardware Acceleration**
+  
+  - **Windows**: Install Intel HAXM or enable Hyper-V
+  - **Mac**: Hypervisor.framework should be enabled by default
+  - **Linux**: Install KVM
+  
+  Verify in Android Studio:
+  
+  ```
+  Tools → SDK Manager → SDK Tools → ☑ Intel x86 Emulator Accelerator (HAXM)
+  ```
+  
+  **Solution 2: Increase Emulator Resources**
+  
+  1. Open Device Manager
+  2. Click **Edit** (pencil icon) on your AVD
+  3. Show Advanced Settings
+  4. Increase:
+     - **RAM**: 2048 MB or higher
+     - **VM heap**: 256 MB
+     - **Internal Storage**: 2048 MB
+  
+  **Solution 3: Try a Different System Image**
+  
+  Some system images work better on certain machines:
+  
+  - Try **x86_64** images (faster with hardware acceleration)
+  - Avoid **arm64** images unless on Apple Silicon
+  - Use **Google Play** images for better app compatibility
+  
+  **Solution 4: Cold Boot**
+  
+  In Device Manager:
+  
+  1. Click ▼ next to Play button
+  2. Select **Cold Boot Now**
+</Accordion>
+
+<Accordion title="App Not Running on Emulator">
+  **Symptoms:**
+  - Build succeeds but app doesn't appear
+  - "Waiting for target device to come online" message
+  
+  **Solution 1: Restart ADB**
+  
+  Open Terminal in Android Studio:
+  
+  ```bash
+  adb kill-server
+  adb start-server
+  adb devices
+  ```
+  
+  You should see your emulator listed.
+  
+  **Solution 2: Check Device Selection**
+  
+  Ensure the correct device is selected in the device dropdown (top toolbar).
+  
+  **Solution 3: Reinstall the App**
+  
+  ```bash
+  # Uninstall existing app
+  adb uninstall com.example.appcontrolescolar
+  
+  # Then run from Android Studio
+  ```
+  
+  **Solution 4: Verify Minimum SDK**
+  
+  Check your AVD's Android version is API 24 or higher:
+  
+  ```
+  Device Manager → Your AVD → Details → API Level: 24+
+  ```
+</Accordion>
+
+<Accordion title="Emulator is Very Slow">
+  **Symptoms:**
+  - UI is laggy and unresponsive
+  - Takes 30+ seconds to open app
+  
+  **Solution 1: Use Hardware Acceleration**
+  
+  See "Emulator Won't Start" above for setup instructions.
+  
+  **Solution 2: Reduce Graphics Quality**
+  
+  In AVD settings:
+  
+  ```
+  Graphics: Hardware - GLES 2.0
+  (or) Automatic
+  ```
+  
+  Avoid "Software" rendering.
+  
+  **Solution 3: Use Physical Device**
+  
+  Testing on a real device is always faster. See [Running on Physical Device](/guides/running-emulator#option-2-running-on-physical-device).
+  
+  **Solution 4: Close Other Apps**
+  
+  Close unused applications and browser tabs to free up system resources.
+</Accordion>
+
+---
+
+## Data & Logic Issues
+
+<Accordion title="FakeData Not Updating">
+  **Symptoms:**
+  - Changed `FakeData.kt` but UI shows old data
+  - Student name or classes don't update
+  
+  **Solution 1: Rebuild Project**
+  
+  ```
+  Build → Rebuild Project
+  ```
+  
+  Then rerun the app.
+  
+  **Solution 2: Clear App Data**
+  
+  If data is cached:
+  
+  ```bash
+  # Clear app data
+  adb shell pm clear com.example.appcontrolescolar
+  ```
+  
+  **Solution 3: Verify Import**
+  
+  Ensure screens import `FakeData`:
+  
+  ```kotlin
+  import com.example.appcontrolescolar.data.FakeData
+  
+  val student = FakeData.student  // ✓ Correct
+  // NOT: val student = Student(...)  // ✗ Wrong
+  ```
+</Accordion>
+
+<Accordion title="Current Class Not Highlighting">
+  **Symptoms:**
+  - No class shows as "Clase actual" on HomeScreen
+  - Wrong class is highlighted
+  
+  **Solution:**
+  
+  Check `FakeData.kt` has **exactly one** class with `isCurrent = true`:
+  
+  ```kotlin
+  val todayClasses = listOf(
+      ClassSession(
+          id = 1,
+          subject = "Física I",
+          // ...
+          isCurrent = false  // Not current
+      ),
+      ClassSession(
+          id = 2,
+          subject = "Programación Orientada a Objetos",
+          // ...
+          isCurrent = true  // ✓ This is the current class
+      ),
+      // ... other classes with isCurrent = false
+  )
+  ```
+  
+  The HomeScreen finds the current class with:
+  
+  ```kotlin
+  val currentClass = FakeData.todayClasses.find { it.isCurrent }
+  ```
+</Accordion>
+
+<Accordion title="Classes Not Showing on ScheduleScreen">
+  **Symptoms:**
+  - ScheduleScreen is blank or shows static data
+  - Not using `FakeData` classes
+  
+  **Issue:**
+  
+  Currently, `ScheduleScreen.kt` uses **hardcoded data** instead of `FakeData.todayClasses`.
+  
+  **Solution: Update ScheduleScreen to Use FakeData**
+  
+  Replace hardcoded `TimeClassCard` calls with:
+  
+  ```kotlin
+  import com.example.appcontrolescolar.data.FakeData
+  
+  @Composable
+  fun ScheduleScreen() {
+      Scaffold { innerPadding ->
+          Column(
+              modifier = Modifier
+                  .fillMaxSize()
+                  .padding(innerPadding)
+                  .verticalScroll(rememberScrollState())
+          ) {
+              ScheduleHeader()
+              
+              Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
+                  FakeData.todayClasses.forEach { classSession ->
+                      TimeClassCard(
+                          hour = classSession.startHour,
+                          endHour = classSession.endHour,
+                          subject = classSession.subject,
+                          teacher = classSession.teacher,
+                          tag = classSession.classroom,
+                          colorLine = getColorForClass(classSession.id),
+                          cardColor = getCardColorForClass(classSession.id)
+                      )
+                      Spacer(modifier = Modifier.height(16.dp))
+                  }
+              }
+          }
+      }
+  }
+  ```
+  
+  <Tip>
+    This change will make the schedule dynamic and sync with `FakeData.kt`.
+  </Tip>
+</Accordion>
+
+---
+
+## Git & Version Control
+
+<Accordion title="Git Clone Failed">
+  **Symptoms:**
+  - "Repository not found" error
+  - Authentication failed
+  
+  **Solution 1: Check Repository URL**
+  
+  Use the correct URL:
+  
+  ```bash
+  git clone https://github.com/Jesus-Puertos/AppTECNMControlEscolar.git
+  ```
+  
+  **Solution 2: Authentication Issues**
+  
+  If the repo is private:
+  
+  ```bash
+  # Use Personal Access Token instead of password
+  git clone https://YOUR_TOKEN@github.com/Jesus-Puertos/AppTECNMControlEscolar.git
+  ```
+  
+  Or use SSH:
+  
+  ```bash
+  git clone git@github.com:Jesus-Puertos/AppTECNMControlEscolar.git
+  ```
+</Accordion>
+
+<Accordion title="Gradle Wrapper Not Executable">
+  **Symptoms:**
+  - "Permission denied" when running `./gradlew`
+  
+  **Solution:**
+  
+  Make the wrapper executable:
+  
+  ```bash
+  # On Mac/Linux
+  chmod +x gradlew
+  ./gradlew build
+  ```
+  
+  On Windows, use:
+  
+  ```cmd
+  gradlew.bat build
+  ```
+</Accordion>
+
+---
+
+## Android Studio Issues
+
+<Accordion title="Android Studio Crashes or Freezes">
+  **Solution 1: Increase IDE Memory**
+  
+  ```
+  Help → Edit Custom VM Options
+  ```
+  
+  Add/modify:
+  
+  ```
+  -Xmx4096m
+  -XX:ReservedCodeCacheSize=512m
+  ```
+  
+  **Solution 2: Disable Unnecessary Plugins**
+  
+  ```
+  Settings → Plugins → Disable unused plugins
+  ```
+  
+  **Solution 3: Update Android Studio**
+  
+  ```
+  Help → Check for Updates
+  ```
+</Accordion>
+
+<Accordion title="Code Completion Not Working">
+  **Solution:**
+  
+  Rebuild indices:
+  
+  ```
+  File → Invalidate Caches → Invalidate and Restart
+  ```
+  
+  After restart, wait for indexing to complete (progress bar at bottom).
+</Accordion>
+
+---
+
+## Getting More Help
+
+<Note>
+  If your issue isn't covered here, try these resources:
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Android Studio Docs" icon="book" href="https://developer.android.com/studio">
+    Official Android Studio documentation
+  </Card>
+  
+  <Card title="Jetpack Compose" icon="code" href="https://developer.android.com/jetpack/compose">
+    Compose documentation and samples
+  </Card>
+  
+  <Card title="Stack Overflow" icon="stack-overflow" href="https://stackoverflow.com/questions/tagged/android">
+    Community Q&A for Android development
+  </Card>
+  
+  <Card title="GitHub Issues" icon="github" href="https://github.com/Jesus-Puertos/AppTECNMControlEscolar/issues">
+    Report bugs or request features
+  </Card>
+</CardGroup>
+
+---
+
+## Project-Specific Help
+
+For issues specific to the TecNM Control Escolar app:
+
+- **Check the README**: Many common setup issues are covered in the [project README](https://github.com/Jesus-Puertos/AppTECNMControlEscolar/blob/main/README.md)
+- **Review code structure**: See the project structure in the README
+- **Ask the team**: Contact the development team listed in the README
+
+---
+
+## Related Guides
+
+<CardGroup cols={3}>
+  <Card title="Running Emulator" icon="mobile" href="/guides/running-emulator">
+    Setup and run the app
+  </Card>
+  
+  <Card title="Fake Data" icon="database" href="/guides/fake-data">
+    Understanding test data
+  </Card>
+  
+  <Card title="Supabase Integration" icon="cloud" href="/guides/supabase-integration">
+    Future backend plans
+  </Card>
+</CardGroup>

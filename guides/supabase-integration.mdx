@@ -1,0 +1,561 @@
+---
+title: Supabase Integration (Roadmap)
+description: Planned backend integration for authentication, real-time data, and cloud storage
+---
+
+The TecNM Control Escolar app is planned to integrate with **Supabase** as its backend-as-a-service platform. This guide outlines the roadmap and planned features.
+
+<Note>
+  **Current Status**: The app uses [FakeData.kt](/guides/fake-data) for mock data. Supabase integration is listed in "Próximos pasos" in the README.
+</Note>
+
+---
+
+## Why Supabase?
+
+Supabase was chosen for several reasons:
+
+- **Open-source** alternative to Firebase
+- **PostgreSQL database** with real-time subscriptions
+- **Built-in authentication** (email, OAuth, magic links)
+- **Row-level security** for multi-tenant data isolation
+- **RESTful API** and Kotlin client library
+- **File storage** for profile pictures and documents
+
+<Tip>
+  Supabase provides a generous free tier perfect for student projects and MVPs.
+</Tip>
+
+---
+
+## Current State vs. Future State
+
+### Current Implementation
+
+The app currently operates in **offline mode** with hardcoded data:
+
+```kotlin
+// Current approach
+import com.example.appcontrolescolar.data.FakeData
+
+val student = FakeData.student
+val classes = FakeData.todayClasses
+val buildings = FakeData.buildings
+```
+
+**Limitations:**
+- No user authentication
+- No personalized data per student
+- No real-time schedule updates
+- No attendance tracking
+- No grades or academic history
+
+### Future Implementation
+
+With Supabase, the app will become a **full-featured cloud application**:
+
+```kotlin
+// Future approach
+val supabase = createSupabaseClient {
+    supabaseUrl = "https://your-project.supabase.co"
+    supabaseKey = "your-anon-key"
+}
+
+val student = supabase.from("students")
+    .select()
+    .eq("control_number", currentUser.id)
+    .single()
+
+val classes = supabase.from("class_sessions")
+    .select()
+    .eq("student_id", student.id)
+    .eq("day", getCurrentDay())
+    .order("start_hour")
+```
+
+---
+
+## Planned Features
+
+### 1. Authentication System
+
+**Login with TecNM credentials:**
+
+```kotlin
+// Email/password authentication
+val user = supabase.auth.signInWith(Email) {
+    email = "226W0487@tecnm.mx"
+    password = "student_password"
+}
+
+// Or magic link authentication (passwordless)
+supabase.auth.signInWith(OTP) {
+    email = "226W0487@tecnm.mx"
+    createUser = false
+}
+```
+
+**Features:**
+- Student login with control number
+- Password reset via email
+- Session management
+- Role-based access (student, teacher, admin)
+
+<Accordion title="Database Schema: users & profiles">
+  ```sql
+  -- Extends Supabase auth.users
+  CREATE TABLE profiles (
+    id UUID REFERENCES auth.users PRIMARY KEY,
+    control_number TEXT UNIQUE NOT NULL,
+    full_name TEXT NOT NULL,
+    career TEXT NOT NULL,
+    semester INTEGER NOT NULL,
+    campus TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  );
+  
+  -- Row-level security
+  ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+  
+  CREATE POLICY "Students can view own profile"
+    ON profiles FOR SELECT
+    USING (auth.uid() = id);
+  ```
+</Accordion>
+
+### 2. Real Schedule Data
+
+**Fetch personalized schedule from database:**
+
+```kotlin
+// Get today's classes for logged-in student
+val classes = supabase.from("enrollments")
+    .select("""
+        class_sessions(
+            id,
+            subject,
+            teacher,
+            classroom,
+            day,
+            start_hour,
+            end_hour
+        )
+    """)
+    .eq("student_id", currentUser.id)
+    .eq("class_sessions.day", currentDay)
+```
+
+**Features:**
+- Dynamic schedule per student
+- Semester-based enrollment
+- Schedule changes reflected in real-time
+- Support for multiple campuses
+
+<Accordion title="Database Schema: classes & enrollments">
+  ```sql
+  CREATE TABLE class_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    subject TEXT NOT NULL,
+    teacher TEXT NOT NULL,
+    classroom TEXT NOT NULL,
+    day TEXT NOT NULL,
+    start_hour TIME NOT NULL,
+    end_hour TIME NOT NULL,
+    semester TEXT NOT NULL,
+    campus TEXT NOT NULL
+  );
+  
+  CREATE TABLE enrollments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_id UUID REFERENCES profiles(id),
+    class_session_id UUID REFERENCES class_sessions(id),
+    enrolled_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(student_id, class_session_id)
+  );
+  
+  -- Students can only see their enrolled classes
+  CREATE POLICY "Students view enrolled classes"
+    ON enrollments FOR SELECT
+    USING (auth.uid() = student_id);
+  ```
+</Accordion>
+
+### 3. QR Code Attendance
+
+**Scan QR code to register attendance:**
+
+```kotlin
+// After scanning QR code with class_session_id
+val attendance = supabase.from("attendance")
+    .insert(mapOf(
+        "student_id" to currentUser.id,
+        "class_session_id" to scannedClassId,
+        "timestamp" to Clock.System.now(),
+        "status" to "present"
+    ))
+```
+
+**Features:**
+- QR code generation by teachers
+- Geofencing (must be on campus)
+- Time validation (only during class hours)
+- Attendance history
+- Attendance percentage per course
+
+<Accordion title="Database Schema: attendance">
+  ```sql
+  CREATE TABLE attendance (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_id UUID REFERENCES profiles(id),
+    class_session_id UUID REFERENCES class_sessions(id),
+    timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    status TEXT NOT NULL CHECK (status IN ('present', 'late', 'absent')),
+    location GEOGRAPHY(POINT),
+    UNIQUE(student_id, class_session_id, timestamp::DATE)
+  );
+  
+  CREATE INDEX idx_attendance_student ON attendance(student_id);
+  CREATE INDEX idx_attendance_class ON attendance(class_session_id);
+  ```
+</Accordion>
+
+### 4. Campus Map Integration
+
+**Real-time building data with geolocation:**
+
+```kotlin
+val buildings = supabase.from("buildings")
+    .select()
+    .eq("campus", "Zongolica")
+    .order("name")
+
+// Calculate distance from user's location
+val userLocation = LocationServices.getFusedLocationProviderClient(context)
+    .lastLocation.await()
+
+buildings.forEach { building ->
+    building.distance = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        building.latitude,
+        building.longitude
+    )
+}
+```
+
+**Features:**
+- GPS coordinates for each building
+- Distance calculation from user
+- Building photos and descriptions
+- Indoor navigation (future)
+
+<Accordion title="Database Schema: buildings">
+  ```sql
+  CREATE TABLE buildings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    description TEXT,
+    category TEXT NOT NULL,
+    campus TEXT NOT NULL,
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    photo_url TEXT
+  );
+  
+  -- Public read access for buildings
+  CREATE POLICY "Buildings are viewable by everyone"
+    ON buildings FOR SELECT
+    USING (true);
+  ```
+</Accordion>
+
+### 5. Grades & Academic History
+
+**View grades and cumulative GPA:**
+
+```kotlin
+val grades = supabase.from("grades")
+    .select("""
+        *,
+        class_sessions(subject, teacher, semester)
+    """)
+    .eq("student_id", currentUser.id)
+    .order("semester", ascending = false)
+
+val gpa = grades.map { it.grade }.average()
+```
+
+**Features:**
+- Per-course grades
+- Semester GPA calculation
+- Cumulative GPA tracking
+- Grade history
+
+<Accordion title="Database Schema: grades">
+  ```sql
+  CREATE TABLE grades (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    student_id UUID REFERENCES profiles(id),
+    class_session_id UUID REFERENCES class_sessions(id),
+    grade DECIMAL(5, 2) NOT NULL CHECK (grade >= 0 AND grade <= 100),
+    semester TEXT NOT NULL,
+    posted_at TIMESTAMPTZ DEFAULT NOW()
+  );
+  
+  CREATE POLICY "Students view own grades"
+    ON grades FOR SELECT
+    USING (auth.uid() = student_id);
+  ```
+</Accordion>
+
+---
+
+## Implementation Roadmap
+
+<Steps>
+  <Step title="Phase 1: Supabase Setup">
+    - Create Supabase project
+    - Design database schema
+    - Set up row-level security policies
+    - Seed initial data (campuses, buildings, demo classes)
+  </Step>
+
+  <Step title="Phase 2: Authentication">
+    - Add Supabase Kotlin client dependency
+    - Implement login screen
+    - Create profile management
+    - Add session persistence
+  </Step>
+
+  <Step title="Phase 3: Data Migration">
+    - Create repository layer
+    - Replace `FakeData` with Supabase queries
+    - Implement caching for offline support
+    - Add loading states and error handling
+  </Step>
+
+  <Step title="Phase 4: New Features">
+    - Implement QR code scanner
+    - Add attendance tracking
+    - Build grades screen
+    - Integrate real campus map
+  </Step>
+
+  <Step title="Phase 5: Real-time Updates">
+    - Add Supabase Realtime subscriptions
+    - Push notifications for schedule changes
+    - Live attendance updates
+    - Real-time grade posting
+  </Step>
+</Steps>
+
+---
+
+## Adding Supabase to the Project
+
+When ready to begin integration:
+
+### 1. Add Dependency
+
+```kotlin
+// app/build.gradle.kts
+dependencies {
+    // Existing dependencies...
+    
+    // Supabase
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.0")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.0")
+    implementation("io.github.jan-tennert.supabase:storage-kt:2.0.0")
+    implementation("io.github.jan-tennert.supabase:auth-kt:2.0.0")
+    
+    // Ktor client (required by Supabase)
+    implementation("io.ktor:ktor-client-android:2.3.7")
+}
+```
+
+### 2. Initialize Supabase Client
+
+```kotlin
+// app/src/main/java/com/example/appcontrolescolar/data/SupabaseClient.kt
+package com.example.appcontrolescolar.data
+
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.realtime.Realtime
+
+object SupabaseClient {
+    val client = createSupabaseClient(
+        supabaseUrl = "https://your-project-ref.supabase.co",
+        supabaseKey = "your-anon-key"
+    ) {
+        install(Postgrest)
+        install(Auth)
+        install(Realtime)
+    }
+}
+```
+
+<Warning>
+  Never commit your Supabase credentials to version control. Use `local.properties` or environment variables.
+</Warning>
+
+### 3. Create Repository Pattern
+
+```kotlin
+// app/src/main/java/com/example/appcontrolescolar/data/repository/StudentRepository.kt
+package com.example.appcontrolescolar.data.repository
+
+import com.example.appcontrolescolar.data.model.Student
+import com.example.appcontrolescolar.data.model.ClassSession
+
+interface StudentRepository {
+    suspend fun getCurrentStudent(): Student
+    suspend fun getTodayClasses(): List<ClassSession>
+}
+
+// Fake implementation (current)
+class FakeStudentRepository : StudentRepository {
+    override suspend fun getCurrentStudent() = FakeData.student
+    override suspend fun getTodayClasses() = FakeData.todayClasses
+}
+
+// Real implementation (future)
+class SupabaseStudentRepository : StudentRepository {
+    override suspend fun getCurrentStudent(): Student {
+        return SupabaseClient.client
+            .from("profiles")
+            .select()
+            .eq("id", currentUserId)
+            .single()
+    }
+    
+    override suspend fun getTodayClasses(): List<ClassSession> {
+        return SupabaseClient.client
+            .from("enrollments")
+            .select("class_sessions(*)")
+            .eq("student_id", currentUserId)
+    }
+}
+```
+
+---
+
+## Testing Strategy
+
+<Accordion title="Local Development with Supabase">
+  **Option 1: Use Supabase Studio**
+  
+  Test against your cloud Supabase project directly.
+  
+  **Option 2: Self-hosted Supabase**
+  
+  Run Supabase locally with Docker:
+  
+  ```bash
+  # Clone Supabase
+  git clone --depth 1 https://github.com/supabase/supabase
+  
+  # Start all services
+  cd supabase/docker
+  cp .env.example .env
+  docker-compose up
+  ```
+  
+  Then point the app to `http://localhost:54321`
+</Accordion>
+
+<Accordion title="Unit Testing with Mock Repository">
+  ```kotlin
+  class MockStudentRepository : StudentRepository {
+      override suspend fun getCurrentStudent() = testStudent
+      override suspend fun getTodayClasses() = testClasses
+  }
+  
+  @Test
+  fun `ProfileScreen displays student info correctly`() {
+      val mockRepo = MockStudentRepository()
+      composeTestRule.setContent {
+          ProfileScreen(repository = mockRepo)
+      }
+      
+      composeTestRule.onNodeWithText("Arlyn Alfaro").assertExists()
+  }
+  ```
+</Accordion>
+
+---
+
+## Security Considerations
+
+<Warning>
+  **Critical security practices for production:**
+  
+  - Enable Row-Level Security (RLS) on all tables
+  - Use service role key only on backend (never in app)
+  - Validate all user input server-side
+  - Implement rate limiting on auth endpoints
+  - Use HTTPS for all API requests (enforced by Supabase)
+</Warning>
+
+### Row-Level Security Example
+
+```sql
+-- Students can only read their own data
+CREATE POLICY "Students access own records"
+  ON profiles
+  FOR ALL
+  USING (auth.uid() = id);
+
+-- Students can only see their enrolled classes
+CREATE POLICY "Students view enrolled classes"
+  ON enrollments
+  FOR SELECT
+  USING (auth.uid() = student_id);
+
+-- Students can only mark their own attendance
+CREATE POLICY "Students mark own attendance"
+  ON attendance
+  FOR INSERT
+  WITH CHECK (auth.uid() = student_id);
+```
+
+---
+
+## Resources
+
+<CardGroup cols={2}>
+  <Card title="Supabase Docs" icon="book" href="https://supabase.com/docs">
+    Official Supabase documentation
+  </Card>
+  
+  <Card title="Kotlin Client" icon="code" href="https://github.com/supabase-community/supabase-kt">
+    Supabase Kotlin library on GitHub
+  </Card>
+  
+  <Card title="Authentication Guide" icon="lock" href="https://supabase.com/docs/guides/auth">
+    Implementing auth with Supabase
+  </Card>
+  
+  <Card title="Row-Level Security" icon="shield" href="https://supabase.com/docs/guides/auth/row-level-security">
+    Securing your database with RLS
+  </Card>
+</CardGroup>
+
+---
+
+## Next Steps
+
+<Note>
+  Supabase integration is a future enhancement. The current app works fully with FakeData for UI testing and development.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Fake Data Guide" icon="database" href="/guides/fake-data">
+    Learn how test data currently works
+  </Card>
+  
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Common issues and solutions
+  </Card>
+</CardGroup>
